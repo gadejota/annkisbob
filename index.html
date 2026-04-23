@@ -1,0 +1,2211 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#f4ecd8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Macro I">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Macro I · Revisão</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f4ecd8;
+    --paper-shade: #ede4c8;
+    --ink: #1a1613;
+    --ink-soft: #3d342a;
+    --ink-muted: #7a6f5e;
+    --rule: #cdc2a6;
+    --accent: #8b3a1f;
+    --accent-soft: #c97e5d;
+    --green: #4a6b3a;
+    --red: #8b2f2f;
+    --page-pad: 20px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'EB Garamond', Georgia, serif;
+    font-size: 19px;
+    line-height: 1.55;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overscroll-behavior-y: contain;
+  }
+  body {
+    background-image:
+      radial-gradient(ellipse at top, rgba(139, 58, 31, 0.03), transparent 50%),
+      radial-gradient(ellipse at bottom, rgba(26, 22, 19, 0.025), transparent 60%);
+    background-attachment: fixed;
+  }
+  .app {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 16px var(--page-pad) 90px;
+    position: relative;
+  }
+  /* ============ HEADER ============ */
+  .masthead {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 18px;
+  }
+  .title-block { display: flex; flex-direction: column; gap: 1px; }
+  .title {
+    font-family: 'EB Garamond', serif;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1;
+  }
+  .subtitle {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+  .stats {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-muted);
+    text-align: right;
+    line-height: 1.35;
+  }
+  .stats b { color: var(--ink); font-weight: 500; }
+  /* ============ PROGRESS ============ */
+  .progress-rail {
+    height: 2px;
+    background: var(--rule);
+    border-radius: 1px;
+    overflow: hidden;
+    margin-bottom: 18px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--ink);
+    width: 0%;
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  /* ============ CARD ============ */
+  .card {
+    background: var(--paper);
+    padding: 4px 0 0;
+    animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .meta-line {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.12em;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .meta-sep { opacity: 0.4; }
+  .meta-tag.hot { color: var(--accent); font-weight: 500; }
+  .question {
+    font-size: 20px;
+    font-weight: 400;
+    color: var(--ink);
+    line-height: 1.45;
+    margin-bottom: 22px;
+    letter-spacing: -0.005em;
+  }
+  .question b { font-weight: 600; }
+  /* ============ OPTIONS (MC) ============ */
+  .options { display: flex; flex-direction: column; gap: 9px; }
+  .opt {
+    display: flex;
+    gap: 12px;
+    padding: 13px 14px;
+    background: transparent;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-align: left;
+    font-family: inherit;
+    font-size: 17px;
+    line-height: 1.4;
+    color: var(--ink-soft);
+    width: 100%;
+    font-weight: 400;
+  }
+  .opt:active { background: var(--paper-shade); }
+  .opt.picked { background: var(--paper-shade); border-color: var(--ink-soft); }
+  .opt.correct { background: rgba(74, 107, 58, 0.08); border-color: var(--green); color: var(--ink); }
+  .opt.wrong { background: rgba(139, 47, 47, 0.06); border-color: var(--red); color: var(--ink); }
+  .opt.fade { opacity: 0.45; }
+  .opt-letter {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--ink-muted);
+    min-width: 18px;
+    padding-top: 3px;
+  }
+  .opt.correct .opt-letter { color: var(--green); }
+  .opt.wrong .opt-letter { color: var(--red); }
+  /* ============ VF BUTTONS ============ */
+  .vf-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .vf-btn {
+    padding: 18px;
+    background: transparent;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    font-family: 'EB Garamond', serif;
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    transition: all 0.15s ease;
+  }
+  .vf-btn:active { background: var(--paper-shade); }
+  .vf-btn.correct { background: rgba(74, 107, 58, 0.1); border-color: var(--green); color: var(--ink); }
+  .vf-btn.wrong { background: rgba(139, 47, 47, 0.08); border-color: var(--red); color: var(--ink); }
+  .vf-btn.fade { opacity: 0.4; }
+  /* ============ NUMERIC ============ */
+  .num-row {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .num-input {
+    width: 100%;
+    padding: 16px;
+    background: var(--paper-shade);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 20px;
+    color: var(--ink);
+    outline: none;
+    text-align: center;
+    letter-spacing: 0.02em;
+  }
+  .num-input:focus { border-color: var(--ink-soft); }
+  .num-input.correct { border-color: var(--green); background: rgba(74, 107, 58, 0.08); }
+  .num-input.wrong { border-color: var(--red); background: rgba(139, 47, 47, 0.06); }
+  .num-submit {
+    padding: 14px;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    border-radius: 2px;
+    font-family: 'EB Garamond', serif;
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .num-submit:active { opacity: 0.8; }
+  /* ============ RESOLUCAO ============ */
+  .resolucao {
+    margin-top: 24px;
+    padding: 20px 18px;
+    background: var(--paper-shade);
+    border-left: 3px solid var(--ink);
+    border-radius: 1px;
+    animation: revealIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+  }
+  @keyframes revealIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .reso-head {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .verdict {
+    font-family: 'EB Garamond', serif;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+  }
+  .verdict.ok { color: var(--green); }
+  .verdict.ko { color: var(--red); }
+  .reso-body {
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+  }
+  .reso-body strong { color: var(--ink); font-weight: 600; }
+  /* ============ NAV ============ */
+  .nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--paper);
+    border-top: 1px solid var(--rule);
+    padding: 14px var(--page-pad);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    z-index: 10;
+  }
+  .nav-inner {
+    max-width: 720px;
+    margin: 0 auto;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
+  .nav-btn {
+    padding: 11px 16px;
+    background: transparent;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    font-family: 'EB Garamond', serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .nav-btn:active { background: var(--paper-shade); }
+  .nav-btn.primary { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .nav-dot-info {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-muted);
+    flex: 1;
+    text-align: center;
+  }
+  /* ============ MENU ============ */
+  .menu-btn {
+    background: transparent;
+    border: none;
+    color: var(--ink-muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    padding: 4px 8px;
+    letter-spacing: 0.1em;
+  }
+  .menu-btn:hover { color: var(--ink); }
+  .menu-panel {
+    position: fixed;
+    inset: 0;
+    background: var(--paper);
+    z-index: 20;
+    padding: 24px var(--page-pad);
+    overflow-y: auto;
+    display: none;
+  }
+  .menu-panel.open { display: block; animation: fadeIn 0.25s ease; }
+  .menu-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 20px;
+  }
+  .menu-title {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .close-btn {
+    background: transparent;
+    border: 1px solid var(--rule);
+    padding: 6px 12px;
+    border-radius: 2px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    color: var(--ink);
+  }
+  .menu-section {
+    margin-bottom: 28px;
+  }
+  .menu-section h3 {
+    font-family: 'EB Garamond', serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-bottom: 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 20px;
+  }
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .stat-val {
+    font-family: 'EB Garamond', serif;
+    font-size: 26px;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--ink);
+  }
+  .stat-lbl {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+  .bloco-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .bloco-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--rule);
+    font-size: 15px;
+  }
+  .bloco-name { color: var(--ink); flex: 1; }
+  .bloco-meta { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-muted); }
+  .menu-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .action-btn {
+    padding: 14px;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    font-family: 'EB Garamond', serif;
+    font-size: 15px;
+    color: var(--ink);
+    cursor: pointer;
+    text-align: left;
+    letter-spacing: 0.02em;
+  }
+  .action-btn:active { background: var(--paper-shade); }
+  .action-btn.danger { color: var(--red); }
+  .action-btn small { display: block; font-size: 12px; color: var(--ink-muted); margin-top: 3px; font-style: italic; }
+  /* ============ DONE SCREEN ============ */
+  .done {
+    text-align: center;
+    padding: 60px 20px;
+    animation: fadeIn 0.5s ease;
+  }
+  .done-ornament {
+    font-size: 32px;
+    color: var(--accent);
+    margin-bottom: 12px;
+    letter-spacing: 0.3em;
+  }
+  .done-title {
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin-bottom: 8px;
+  }
+  .done-sub {
+    color: var(--ink-muted);
+    font-style: italic;
+    font-size: 15px;
+    margin-bottom: 28px;
+  }
+  .done-stats {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    margin-bottom: 36px;
+    padding: 20px 0;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+  }
+  .done-stat { display: flex; flex-direction: column; }
+  .done-stat-val {
+    font-size: 32px;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--ink);
+  }
+  .done-stat-lbl {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-top: 6px;
+  }
+  .done-cta {
+    padding: 14px 28px;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    border-radius: 2px;
+    font-family: 'EB Garamond', serif;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  /* ============ FOOTNOTE ============ */
+  .footnote {
+    text-align: center;
+    padding: 20px 0 0;
+    font-size: 11px;
+    color: var(--ink-muted);
+    font-style: italic;
+    letter-spacing: 0.03em;
+  }
+  .ornament {
+    text-align: center;
+    color: var(--rule);
+    font-size: 14px;
+    letter-spacing: 0.5em;
+    margin: 22px 0 10px;
+  }
+  /* small screens */
+  @media (max-width: 420px) {
+    body { font-size: 18px; }
+    .question { font-size: 19px; }
+    .opt { font-size: 16px; padding: 12px; }
+    .title { font-size: 20px; }
+    .nav-btn { padding: 10px 12px; font-size: 13px; }
+    .app { padding: 12px 16px 90px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app" id="app">
+  <div class="masthead">
+    <div class="title-block">
+      <div class="title">Macro I · Revisão</div>
+      <div class="subtitle">REC2201 · Lista 1</div>
+    </div>
+    <div class="stats" id="stats">
+      <div><b>0</b> / 110</div>
+      <div id="acc-display">—</div>
+    </div>
+  </div>
+
+  <div class="progress-rail"><div class="progress-fill" id="progFill"></div></div>
+
+  <div id="card-mount"></div>
+
+  <div class="ornament">✦ ❦ ✦</div>
+  <div class="footnote" id="footnote-text">Deslize à esquerda para próxima · toque no menu para estatísticas</div>
+</div>
+
+<div class="nav">
+  <div class="nav-inner">
+    <button class="menu-btn" id="menuOpen">≡ MENU</button>
+    <div class="nav-dot-info" id="navInfo">—</div>
+    <button class="nav-btn primary" id="nextBtn" disabled>Próxima →</button>
+  </div>
+</div>
+
+<div class="menu-panel" id="menuPanel">
+  <div class="menu-head">
+    <div class="menu-title">Estatísticas</div>
+    <button class="close-btn" id="menuClose">FECHAR</button>
+  </div>
+
+  <div class="menu-section">
+    <h3>Sessão atual</h3>
+    <div class="stat-grid">
+      <div class="stat-item"><div class="stat-val" id="sRespondidas">0</div><div class="stat-lbl">Respondidas</div></div>
+      <div class="stat-item"><div class="stat-val" id="sCertas">0</div><div class="stat-lbl">Acertos</div></div>
+      <div class="stat-item"><div class="stat-val" id="sErradas">0</div><div class="stat-lbl">Erros</div></div>
+      <div class="stat-item"><div class="stat-val" id="sTaxa">—</div><div class="stat-lbl">Taxa acerto</div></div>
+    </div>
+  </div>
+
+  <div class="menu-section">
+    <h3>Memória (acumulado)</h3>
+    <div class="stat-grid">
+      <div class="stat-item"><div class="stat-val" id="mVistas">0</div><div class="stat-lbl">Questões vistas</div></div>
+      <div class="stat-item"><div class="stat-val" id="mDominadas">0</div><div class="stat-lbl">Dominadas</div></div>
+      <div class="stat-item"><div class="stat-val" id="mFracas">0</div><div class="stat-lbl">Fracas (erros &gt; acertos)</div></div>
+      <div class="stat-item"><div class="stat-val" id="mTaxaG">—</div><div class="stat-lbl">Taxa global</div></div>
+    </div>
+  </div>
+
+  <div class="menu-section">
+    <h3>Por bloco</h3>
+    <div class="bloco-list" id="blocoList"></div>
+  </div>
+
+  <div class="menu-section">
+    <h3>Ações</h3>
+    <div class="menu-actions">
+      <button class="action-btn" id="actRestart">Reiniciar sessão
+        <small>começa nova ordem, mantém memória</small></button>
+      <button class="action-btn" id="actFracas">Revisar só as fracas
+        <small>foca nas que você mais errou</small></button>
+      <button class="action-btn" id="actShuffle">Embaralhar tudo
+        <small>todas as 110, nova ordem</small></button>
+      <button class="action-btn danger" id="actReset">Apagar histórico
+        <small>zera a memória SRS completa</small></button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Banco de questões - Macroeconomia I (REC2201)
+// Baseado em: Lista 1 do Prof. Reynaldo Fernandes + slides (Modelo Keynesiano e IS-LM) + Resolução didática
+// Cada questão tem: id, bloco, tipo (mc=múltipla escolha, vf=verdadeiro/falso, num=numérica), enunciado, opções (se mc), resposta, resolução
+
+const QUESTIONS = [
+  // ============================================================
+  // BLOCO A — FUNDAMENTOS DO MODELO KEYNESIANO SIMPLES
+  // ============================================================
+  {
+    id: 1, bloco: "A", tema: "Consumo",
+    tipo: "mc",
+    q: "Na função consumo keynesiana C = C₀ + c₁·Yd, o que representa c₁?",
+    opts: [
+      "A propensão média a consumir (PMeC)",
+      "A propensão marginal a consumir (PMC), ou seja, a fração de cada real adicional de renda disponível que vira consumo",
+      "O consumo autônomo",
+      "A taxa de poupança das famílias"
+    ],
+    correct: 1,
+    resolucao: "c₁ é a propensão marginal a consumir (PMC = Propensão Marginal a Consumir). Ela mede ∂C/∂Yd, ou seja, quanto o consumo aumenta quando a renda disponível aumenta em 1 real. Pela Lei Psicológica Fundamental de Keynes, 0 < c₁ < 1. Yd (renda disponível) = Y − T, onde Y é a renda agregada e T são os impostos líquidos. Não confundir com PMeC (propensão MÉDIA a consumir) = C/Yd, que é uma razão de níveis, não de variações."
+  },
+  {
+    id: 2, bloco: "A", tema: "Consumo",
+    tipo: "mc",
+    q: "O que é o consumo autônomo (C₀) na função C = C₀ + c₁·Yd?",
+    opts: [
+      "O consumo que depende da taxa de juros",
+      "O consumo que cresce proporcionalmente à renda",
+      "A parcela de consumo que independe da renda disponível — existiria mesmo com Yd = 0",
+      "O consumo do governo (G)"
+    ],
+    correct: 2,
+    resolucao: "C₀ é o consumo autônomo: a parcela de consumo que as famílias realizam independentemente da sua renda disponível (Yd = Y − T). Reflete necessidades básicas (alimentação, moradia) que seriam financiadas via desacumulação de poupança ou endividamento mesmo com renda zero. No gráfico C × Y, C₀ é o intercepto vertical."
+  },
+  {
+    id: 3, bloco: "A", tema: "Multiplicador",
+    tipo: "mc",
+    q: "No modelo keynesiano simples com T exógeno e c₁ = 0,75, quanto vale o multiplicador keynesiano (mk)?",
+    opts: ["1,33", "3", "4", "0,75"],
+    correct: 2,
+    resolucao: "mk = 1/(1 − c₁) = 1/(1 − 0,75) = 1/0,25 = 4. O multiplicador keynesiano (mk) mede por quanto um aumento autônomo de 1 real em qualquer componente do gasto autônomo (C₀, I₀, G) multiplica o aumento final da renda de equilíbrio (Y). A intuição: um aumento inicial de gasto vira renda para alguém, que consome uma fração c₁ disso, gerando nova renda, e assim sucessivamente — uma PG (progressão geométrica) infinita de razão c₁ que converge para 1/(1−c₁)."
+  },
+  {
+    id: 4, bloco: "A", tema: "Multiplicador",
+    tipo: "mc",
+    q: "Por que o multiplicador keynesiano é maior que 1?",
+    opts: [
+      "Porque o governo sempre aumenta os gastos junto",
+      "Porque o aumento inicial de gasto gera renda, que gera consumo, que gera mais renda, em rodadas sucessivas",
+      "Porque os preços sobem junto",
+      "Porque a taxa de juros cai automaticamente"
+    ],
+    correct: 1,
+    resolucao: "mk = 1/(1 − c₁) > 1 sempre que 0 < c₁ < 1. O mecanismo: ΔG de 100 vira ΔY de 100 na primeira rodada. Dessa renda extra, as famílias consomem c₁·100 (ex.: 80 se c₁=0,8), gerando nova renda de 80 para outro agente, que consome 0,8·80=64, e assim por diante. A soma 100 + 80 + 64 + ... = 100/(1−0,8) = 500. Esse é o efeito multiplicador: cada real de gasto autônomo se desdobra em várias rodadas de renda e consumo."
+  },
+  {
+    id: 5, bloco: "A", tema: "Multiplicador de impostos",
+    tipo: "mc",
+    q: "No modelo keynesiano simples com T exógeno, qual é o multiplicador de impostos (mT)?",
+    opts: [
+      "1/(1−c₁)",
+      "−c₁/(1−c₁)",
+      "−1/(1−c₁)",
+      "c₁/(1−c₁)"
+    ],
+    correct: 1,
+    resolucao: "mT = ∂Y/∂T = −c₁/(1−c₁). É NEGATIVO porque aumentar T reduz a renda disponível Yd, reduz o consumo C, reduz a DA (demanda agregada) e, portanto, reduz Y. É MENOR EM MÓDULO que mk = 1/(1−c₁) porque o imposto não afeta diretamente a DA — ele passa primeiro pela renda disponível, e só a fração c₁ dessa queda de Yd vira menos consumo. O efeito 'vaza' pela poupança das famílias."
+  },
+  {
+    id: 6, bloco: "A", tema: "Multiplicador de impostos",
+    tipo: "mc",
+    q: "Com c₁ = 0,8, um corte autônomo de 10 nos impostos gera qual aumento em Y?",
+    opts: ["10", "50", "40", "80"],
+    correct: 2,
+    resolucao: "ΔY = mT · ΔT = −c₁/(1−c₁) · (−10) = (0,8/0,2) · 10 = 4 · 10 = 40. Compare com um aumento de 10 em I (investimento), que geraria ΔY = mk · ΔI = 5 · 10 = 50. Um corte de T de 10 é MENOS potente que um aumento de I de 10 porque o efeito via imposto passa pela renda disponível e só a fração c₁ dela é consumida — o resto (1−c₁=0,2) vai para poupança e 'vaza' do circuito de renda-consumo."
+  },
+  {
+    id: 7, bloco: "A", tema: "Orçamento equilibrado",
+    tipo: "mc",
+    q: "Qual o valor do multiplicador do orçamento equilibrado (Teorema de Haavelmo)?",
+    opts: ["0", "1/(1−c₁)", "1", "c₁"],
+    correct: 2,
+    resolucao: "mOE = mk + mT = 1/(1−c₁) + (−c₁/(1−c₁)) = (1−c₁)/(1−c₁) = 1. Esse é o Teorema de Haavelmo. Intuição: se ΔG = ΔT = 100, o efeito expansionista de G (cheio, porque G entra direto na DA) supera o efeito contracionista de T (amortecido, porque T passa pela renda disponível). O saldo líquido é exatamente igual ao aumento de G. Resultado importante: o governo pode estimular a economia SEM gerar déficit, desde que financie o aumento de gastos com aumento proporcional de impostos."
+  },
+  {
+    id: 8, bloco: "A", tema: "Poupança",
+    tipo: "mc",
+    q: "Se C = C₀ + c₁·(Y − T), qual é a função poupança privada (Sp)?",
+    opts: [
+      "Sp = C₀ + c₁·(Y − T)",
+      "Sp = −C₀ + (1 − c₁)·(Y − T)",
+      "Sp = Y − C₀",
+      "Sp = C₀ − c₁·(Y − T)"
+    ],
+    correct: 1,
+    resolucao: "Por definição, poupança privada (Sp) = renda disponível (Yd) menos consumo (C). Yd = Y − T. Logo: Sp = (Y − T) − C = (Y − T) − [C₀ + c₁·(Y − T)] = −C₀ + (1 − c₁)·(Y − T). O termo (1 − c₁) é a PMgS (Propensão Marginal a Poupar) — a fração de cada real extra de renda disponível que vira poupança. O intercepto é negativo (−C₀) porque com Yd = 0 as famílias desacumulam poupança para consumir C₀."
+  },
+  {
+    id: 9, bloco: "A", tema: "Poupança",
+    tipo: "mc",
+    q: "Se a PMC (propensão marginal a consumir) é 0,8, qual é a PMgS (propensão marginal a poupar)?",
+    opts: ["0,8", "0,2", "1,25", "0"],
+    correct: 1,
+    resolucao: "PMgS = 1 − PMC = 1 − 0,8 = 0,2. Essa identidade vem do fato de que cada real adicional de renda disponível ou é consumido ou é poupado, não existe terceira via: PMC + PMgS = 1. Em Macroeconomia, PMgS também aparece como 's' (taxa de poupança marginal)."
+  },
+  {
+    id: 10, bloco: "A", tema: "Princípio da demanda efetiva",
+    tipo: "mc",
+    q: "No modelo keynesiano simples, o que determina o nível de produção de equilíbrio?",
+    opts: [
+      "A oferta de fatores (especialmente trabalho)",
+      "A demanda agregada (DA), pelo Princípio da Demanda Efetiva",
+      "O nível geral de preços",
+      "A quantidade de moeda na economia"
+    ],
+    correct: 1,
+    resolucao: "No modelo keynesiano simples, vale o Princípio da Demanda Efetiva: como há recursos ociosos (especialmente trabalho — desemprego involuntário) e a OA (oferta agregada) é horizontal no plano P × Y, quem 'puxa' o produto é a DA (demanda agregada = C + I + G em economia fechada). Os preços são fixos/rígidos. Então: quanto a economia vai produzir depende de quanto os agentes querem gastar. Isso é o oposto do modelo clássico, onde a OA (determinada pela dotação de fatores) define Y."
+  },
+  {
+    id: 11, bloco: "A", tema: "Pressupostos",
+    tipo: "vf",
+    q: "No modelo keynesiano simples, a oferta agregada (OA) é totalmente horizontal no plano P × Y.",
+    correct: true,
+    resolucao: "VERDADEIRO. Pressuposto central do modelo keynesiano: há recursos produtivos ociosos (desemprego involuntário) e rigidez de preços no curto prazo. Com OA horizontal, qualquer aumento na DA (demanda agregada) se traduz integralmente em aumento de Y, sem pressão sobre o nível geral de preços P. Isso contrasta com o modelo clássico (OA vertical) onde só P se ajusta."
+  },
+  {
+    id: 12, bloco: "A", tema: "Fisher",
+    tipo: "mc",
+    q: "A equação de Fisher estabelece que r = i − πᵉ. O que cada termo significa?",
+    opts: [
+      "r = taxa real, i = taxa nominal, πᵉ = inflação esperada",
+      "r = taxa nominal, i = taxa real, πᵉ = inflação passada",
+      "r = risco, i = inflação, πᵉ = prêmio",
+      "r = juros reais, i = taxa de câmbio, πᵉ = inflação externa"
+    ],
+    correct: 0,
+    resolucao: "Equação de Fisher: r (taxa de juros REAL) = i (taxa de juros NOMINAL) − πᵉ (inflação ESPERADA). Nos modelos com preços rígidos e πᵉ = 0 (caso do keynesiano simples e do IS-LM básico), tem-se r = i, ou seja, a taxa real é igual à nominal. Isso simplifica a análise: quando falamos da taxa que afeta o investimento (que é a real, r), podemos usar a taxa do mercado monetário (que é a nominal, i) sem distinção."
+  },
+  {
+    id: 13, bloco: "A", tema: "Cruz keynesiana",
+    tipo: "mc",
+    q: "Na 'cruz keynesiana', a reta de 45° representa:",
+    opts: [
+      "A função consumo",
+      "A condição de equilíbrio Y = DA (OA = DA)",
+      "A função investimento",
+      "A oferta de moeda"
+    ],
+    correct: 1,
+    resolucao: "A reta de 45° no gráfico da cruz keynesiana é a condição de equilíbrio do mercado de bens: Y = DA (Demanda Agregada). Qualquer ponto sobre ela satisfaz OA = DA. Graficamente, o equilíbrio ocorre onde a reta DA = C + I + G (com inclinação c₁, menor que 1) cruza a reta de 45°. À esquerda desse cruzamento, DA > Y (excesso de demanda, empresas acumulam desestoque); à direita, DA < Y (excesso de oferta, empresas acumulam estoque)."
+  },
+  {
+    id: 14, bloco: "A", tema: "Cruz keynesiana",
+    tipo: "mc",
+    q: "Qual é a inclinação da reta DA = C + I + G na cruz keynesiana (em relação a Y)?",
+    opts: ["1", "c₁ (PMC)", "(1 − c₁)", "0"],
+    correct: 1,
+    resolucao: "A inclinação é c₁ (PMC — propensão marginal a consumir). Como I e G são exógenos em relação a Y (não dependem de Y no modelo keynesiano simples), apenas C varia com Y, e a derivada dC/dY = c₁. Por isso todas as retas C, (C+I) e (C+I+G) são paralelas, com inclinação c₁. Quanto mais próximo de 1 for c₁, mais íngreme a DA, maior o multiplicador e maior o Y de equilíbrio."
+  },
+  {
+    id: 15, bloco: "A", tema: "Multiplicador com imposto endógeno",
+    tipo: "mc",
+    q: "Se T = t·Y (imposto proporcional à renda), qual é o novo multiplicador keynesiano?",
+    opts: [
+      "1/(1−c₁)",
+      "1/(1−c₁(1−t))",
+      "1/(1+c₁·t)",
+      "c₁/(1−t)"
+    ],
+    correct: 1,
+    resolucao: "Com T = t·Y, a renda disponível vira Yd = Y − tY = (1−t)Y. A função consumo passa a ser C = C₀ + c₁·(1−t)Y. No equilíbrio Y = C₀ + c₁(1−t)Y + I + G, isolando Y: Y·[1 − c₁(1−t)] = autônomos, logo mk' = 1/[1−c₁(1−t)]. Esse multiplicador é MENOR que o original 1/(1−c₁). Isso acontece porque o imposto proporcional funciona como ESTABILIZADOR AUTOMÁTICO: parte de cada aumento de renda é 'drenada' pelo imposto, atenuando as rodadas seguintes do efeito multiplicador."
+  },
+  {
+    id: 16, bloco: "A", tema: "Estabilizador automático",
+    tipo: "vf",
+    q: "A introdução de um imposto proporcional à renda (T = t·Y) AUMENTA o multiplicador keynesiano.",
+    correct: false,
+    resolucao: "FALSO. Pelo contrário, REDUZ. O multiplicador vira 1/[1−c₁(1−t)], que é menor que 1/(1−c₁). A alíquota t atua como estabilizador automático fiscal — a cada rodada de aumento de renda, uma fração t é retirada via impostos e não vira consumo. Isso é exatamente o que a questão (0) do Exercício 9 pergunta: a afirmação 'o efeito sobre a renda de variações autônomas do investimento será intensificado' é FALSA, pois na verdade é atenuado."
+  },
+  {
+    id: 17, bloco: "A", tema: "Investimento endógeno à renda",
+    tipo: "mc",
+    q: "Se o investimento passa a depender da renda (I = I₀ − b·i + d·Y com 0 < d < 1), o multiplicador keynesiano:",
+    opts: [
+      "Diminui",
+      "Fica igual a 1",
+      "Aumenta, virando 1/(1−c₁−d)",
+      "Torna-se nulo"
+    ],
+    correct: 2,
+    resolucao: "AUMENTA. Substituindo na equação de equilíbrio: Y = C₀ + c₁Y + I₀ − bi + dY + G, isolando: Y(1 − c₁ − d) = autônomos, logo mk' = 1/(1−c₁−d) > 1/(1−c₁). É o chamado efeito acelerador do investimento: aumentos de Y induzem mais I, que gera mais Y, em um círculo virtuoso. É o oposto do estabilizador automático — o investimento endógeno amplifica o ciclo."
+  },
+  {
+    id: 18, bloco: "A", tema: "Poupança pública",
+    tipo: "mc",
+    q: "Como se define a poupança pública (Sg)?",
+    opts: [
+      "Sg = G − T",
+      "Sg = T − G",
+      "Sg = Y − C",
+      "Sg = I − S"
+    ],
+    correct: 1,
+    resolucao: "Sg (poupança do governo) = T (impostos líquidos) − G (gastos do governo). Se Sg > 0, o governo tem superávit primário (poupa); se Sg < 0, déficit primário (despoupa). Em economia fechada, a identidade fundamental é S_total = Sp + Sg = I. Ou seja, toda poupança (privada + pública) financia o investimento agregado."
+  },
+  {
+    id: 19, bloco: "A", tema: "Identidade macroeconômica",
+    tipo: "mc",
+    q: "Em uma economia FECHADA em equilíbrio, qual identidade é sempre verdadeira?",
+    opts: [
+      "S_total = I (poupança total igual ao investimento)",
+      "C = Y",
+      "G = T",
+      "I = G"
+    ],
+    correct: 0,
+    resolucao: "S_total = I. Partindo de Y = C + I + G e da definição S_total = (Y − T − C) + (T − G) = Sp + Sg, substituímos: S_total = Y − C − G. Como do equilíbrio Y − C − G = I, segue S_total = I. No Exercício 1 da lista isso aparece: Sp=25, Sg=75, S_total=100, I=100 — bate direitinho. Em economia aberta, a identidade vira S_total = I + (X−M), ou seja, exportações líquidas somam à equação."
+  },
+  {
+    id: 20, bloco: "A", tema: "Ex. 10 da lista",
+    tipo: "num",
+    q: "Em economia fechada e sem governo, um aumento de 100 em I gerou aumento de 500 em Y. Qual é o c₁ (PMC)?",
+    resposta: "0,8",
+    aceitar: ["0,8", "0.8", "80%"],
+    resolucao: "mk = ΔY/ΔI = 500/100 = 5. Como mk = 1/(1−c₁), temos 5 = 1/(1−c₁), logo 1−c₁ = 0,2 e c₁ = 0,8. Consequentemente, a PMgS (propensão marginal a poupar) = 1 − 0,8 = 0,2. O aumento de consumo gerado foi ΔC = c₁·ΔY = 0,8·500 = 400. É exatamente o Exercício 10 da lista."
+  },
+
+  // ============================================================
+  // BLOCO B — DERIVAÇÃO E MECÂNICA DA IS
+  // ============================================================
+  {
+    id: 21, bloco: "B", tema: "Definição IS",
+    tipo: "mc",
+    q: "A curva IS representa:",
+    opts: [
+      "Equilíbrio do mercado monetário",
+      "Todas as combinações (Y, i) que equilibram o mercado de bens (OA = DA, ou I = S)",
+      "A função de oferta de moeda",
+      "A relação entre inflação e desemprego"
+    ],
+    correct: 1,
+    resolucao: "A IS (do inglês Investment = Saving) é o lugar geométrico dos pares (Y, i) que mantêm o mercado de BENS em equilíbrio, ou seja, OA (oferta agregada) = DA (demanda agregada). Equivale também a dizer I = S em economia fechada sem governo. Cada ponto sobre a IS representa uma combinação de taxa de juros e renda agregada que torna o mercado de produtos e serviços equilibrado. A causalidade é: i → I → DA → Y."
+  },
+  {
+    id: 22, bloco: "B", tema: "Inclinação IS",
+    tipo: "mc",
+    q: "Por que a curva IS tem inclinação NEGATIVA?",
+    opts: [
+      "Porque juros maiores reduzem o investimento, reduzindo a DA e, portanto, o Y de equilíbrio",
+      "Porque renda maior atrai mais capital externo",
+      "Porque inflação sobe quando Y sobe",
+      "Porque a oferta de moeda cresce com Y"
+    ],
+    correct: 0,
+    resolucao: "Inclinação negativa da IS: ↑ i (taxa de juros) → ↓ I (investimento, pois I = I₀ − b·r e r = i quando πᵉ=0) → ↓ DA (demanda agregada) → ↓ Y (produto de equilíbrio). A causalidade é de i para Y passando pelo investimento. O investimento é a variável de LIGAÇÃO entre i e Y na IS. Algebricamente: i = (1/b)·(C₀ − c₁T + I₀ + G + bπᵉ) − [(1−c₁)/b]·Y, com coeficiente de Y igual a −(1−c₁)/b < 0."
+  },
+  {
+    id: 23, bloco: "B", tema: "Derivação IS",
+    tipo: "mc",
+    q: "Na equação da IS, i = (1/b)·(C₀ − c₁T + I₀ + G) − [(1−c₁)/b]·Y, qual é a INCLINAÇÃO dessa reta (no plano i × Y)?",
+    opts: [
+      "1/(1−c₁)",
+      "(1−c₁)/b",
+      "−(1−c₁)/b",
+      "b/(1−c₁)"
+    ],
+    correct: 2,
+    resolucao: "A inclinação é −(1−c₁)/b (em módulo: (1−c₁)/b). Vem da derivada di/dY. Observações: (1) quanto MAIOR b (mais sensibilidade do investimento aos juros), MENOR (em módulo) a inclinação, ou seja, IS mais HORIZONTAL. (2) Quanto MAIOR c₁ (e portanto maior mk), MENOR a inclinação, IS mais HORIZONTAL. Intuição: se I responde muito a i (b grande), uma pequena queda de i gera muito ∆I e ∆Y, então a IS 'anda' muito no eixo Y para cada mudança em i."
+  },
+  {
+    id: 24, bloco: "B", tema: "Deslocamento IS",
+    tipo: "mc",
+    q: "O que faz a curva IS se deslocar para a DIREITA?",
+    opts: [
+      "Aumento da oferta de moeda (M)",
+      "Queda dos preços (P)",
+      "Aumento de G (gasto público), de C₀, ou de I₀, ou queda de T (impostos)",
+      "Aumento da taxa de juros"
+    ],
+    correct: 2,
+    resolucao: "A IS desloca-se quando mudam variáveis EXÓGENAS que afetam a DA sem passar pelos juros: ↑G, ↑C₀, ↑I₀ (aumento autônomo de investimento, não pela via dos juros), ou ↓T. Mudanças em i ou Y provocam movimento AO LONGO da IS, não deslocamento. Já mudanças em M ou P afetam a LM, não a IS. Regra de ouro: variável nos eixos → movimento ao longo; parâmetro exógeno → deslocamento da curva."
+  },
+  {
+    id: 25, bloco: "B", tema: "IS e política fiscal",
+    tipo: "mc",
+    q: "Uma política fiscal expansionista (aumento de G) provoca:",
+    opts: [
+      "Deslocamento da IS para a esquerda",
+      "Movimento ao longo da IS para cima",
+      "Deslocamento da IS para a direita",
+      "Deslocamento da LM para cima"
+    ],
+    correct: 2,
+    resolucao: "↑G (política fiscal expansionista) → desloca a IS para a DIREITA. Para cada nível de i, a renda de equilíbrio no mercado de bens passa a ser maior (porque mais gasto público puxa DA). Essa é a resposta direta à afirmação FALSA do Exercício 5 (item 2) da lista: 'um aumento de G representa movimento ao longo da IS' — ERRADO, G é parâmetro exógeno, seu aumento DESLOCA a curva."
+  },
+  {
+    id: 26, bloco: "B", tema: "Regiões IS",
+    tipo: "mc",
+    q: "Em um ponto ACIMA da curva IS, o que acontece no mercado de bens?",
+    opts: [
+      "Excesso de demanda por bens (EDB)",
+      "Excesso de oferta de bens (EOB) — ou seja, DA < OA",
+      "Equilíbrio perfeito",
+      "Excesso de demanda por moeda"
+    ],
+    correct: 1,
+    resolucao: "Acima da IS significa i alto demais para aquele Y. Com i alto, o investimento I está baixo demais, então DA (demanda agregada) = C + I + G está abaixo do que seria compatível com aquele nível de produção Y. Logo: OA > DA ⟹ EOB (excesso de oferta de bens). Simetricamente, abaixo da IS há EDB (excesso de demanda por bens, DA > OA)."
+  },
+  {
+    id: 27, bloco: "B", tema: "Causalidade IS",
+    tipo: "mc",
+    q: "Na curva IS, qual é a sequência causal correta?",
+    opts: [
+      "Y → M → i → DA",
+      "i → I (investimento) → DA → Y",
+      "Y → DA → I → i",
+      "i → Y → I → DA"
+    ],
+    correct: 1,
+    resolucao: "Na IS a causalidade é: i (taxa de juros) → I (investimento) → DA (demanda agregada) → Y (produto agregado). Ou seja, a taxa de juros determina o investimento (via I = I₀ − b·r), o investimento é componente da DA, e a DA determina Y via princípio da demanda efetiva. O investimento é a 'variável de ligação' entre i e Y. Representamos i em função de Y só por convenção gráfica — a causalidade ECONÔMICA é o oposto."
+  },
+  {
+    id: 28, bloco: "B", tema: "IS horizontal",
+    tipo: "mc",
+    q: "Quando a curva IS é muito próxima da HORIZONTAL, o que isso significa?",
+    opts: [
+      "Investimento é pouco sensível aos juros",
+      "Investimento é MUITO sensível aos juros (b grande)",
+      "A demanda por moeda é rígida",
+      "O multiplicador é pequeno"
+    ],
+    correct: 1,
+    resolucao: "IS horizontal ⟺ b grande (investimento muito sensível a i). A inclinação é (1−c₁)/b em módulo; se b → ∞, inclinação → 0. Intuição: pequenas variações de i causam grandes variações de I e, portanto, de Y. Consequência para políticas: PME (política monetária expansionista) fica MUITO eficaz (cortar i gera muito ∆I) e PFE (política fiscal expansionista) fica POUCO eficaz (o efeito crowding-out é grande — quando G sobe e i sobe em resposta, I cai bastante)."
+  },
+  {
+    id: 29, bloco: "B", tema: "IS vertical",
+    tipo: "mc",
+    q: "Se a curva IS é VERTICAL, o que se pode dizer?",
+    opts: [
+      "b → ∞ (investimento infinitamente sensível a juros)",
+      "b → 0 (investimento INSENSÍVEL a juros) — PF totalmente eficaz, PM totalmente ineficaz",
+      "c₁ = 0",
+      "A LM é horizontal"
+    ],
+    correct: 1,
+    resolucao: "IS vertical ⟺ b → 0 (investimento NÃO responde aos juros). Inclinação (1−c₁)/b → ∞. Nesse caso, variações em i não afetam I e, portanto, não afetam Y. Consequência: PFE (política fiscal expansionista) é MÁXIMA (sem crowding-out, porque mesmo se i sobe, I não muda). PME (política monetária expansionista) é NULA (cortar i não muda I nem Y). É o oposto do caso 'IS horizontal'."
+  },
+  {
+    id: 30, bloco: "B", tema: "IS e multiplicador",
+    tipo: "vf",
+    q: "Quanto MAIOR o multiplicador keynesiano (mk), MAIS INCLINADA é a curva IS.",
+    correct: false,
+    resolucao: "FALSO. É o OPOSTO. A inclinação da IS é (1−c₁)/b = 1/(mk·b). Portanto, quanto MAIOR mk, MENOR a inclinação, ou seja, IS MAIS HORIZONTAL. Intuição: multiplicador grande significa que cada real de gasto autônomo gera muita renda. Quando i cai e I sobe, o efeito sobre Y é amplificado pelo multiplicador, então para cada ∆i há um ∆Y grande — curva mais deitada. Essa é a resposta ao Exercício 3, item (0) da lista."
+  },
+  {
+    id: 31, bloco: "B", tema: "Deslocamento IS",
+    tipo: "mc",
+    q: "Um aumento do investimento privado causado por uma REDUÇÃO da taxa de juros representa:",
+    opts: [
+      "Deslocamento da IS para a direita",
+      "Movimento AO LONGO da IS (para baixo e para a direita)",
+      "Deslocamento da LM",
+      "Nenhum efeito"
+    ],
+    correct: 1,
+    resolucao: "MOVIMENTO AO LONGO DA IS. Regra geral: se a variável que muda é uma das variáveis dos eixos (Y ou i), trata-se de movimento ao longo da curva. A queda de i está no eixo vertical e o aumento resultante de I já está 'embutido' na construção da IS. Já um aumento AUTÔNOMO de I (ex.: aumento de I₀ por otimismo empresarial) desloca a IS. Essa distinção é o que o Exercício 5, item (2) da lista cobra — e a afirmação de lá está INVERTIDA (é FALSA)."
+  },
+  {
+    id: 32, bloco: "B", tema: "Canal PF no IS-LM",
+    tipo: "mc",
+    q: "No modelo IS-LM, a política fiscal expansionista eleva a renda por qual canal?",
+    opts: [
+      "↑G desloca IS para a direita → ↑Y e ↑i → ↓I (crowding out parcial) → ∆Y final menor que mk·∆G",
+      "↑G desloca LM para baixo → ↓i → ↑I → ↑Y",
+      "↑G reduz os preços → ↑M/P → ↑Y",
+      "↑G aumenta a oferta de moeda"
+    ],
+    correct: 0,
+    resolucao: "Canal da PF expansionista no IS-LM: (1) ↑G desloca a IS para a direita. (2) A nova intersecção com a LM tem Y maior E i maior. (3) O i mais alto reduz parcialmente o investimento privado — é o efeito CROWDING OUT (deslocamento). (4) Por isso, no IS-LM o ∆Y final é MENOR que mk·∆G do keynesiano simples, onde i era fixo. Quanto maior o crowding out (LM mais vertical, b maior), menos eficaz a PF."
+  },
+  // ============================================================
+  // BLOCO C — DERIVAÇÃO E MECÂNICA DA LM / MERCADO MONETÁRIO
+  // ============================================================
+  {
+    id: 33, bloco: "C", tema: "Definição LM",
+    tipo: "mc",
+    q: "A curva LM representa:",
+    opts: [
+      "Equilíbrio do mercado de bens",
+      "Todas as combinações (Y, i) que equilibram o mercado MONETÁRIO ((M/P)^d = (M/P)^s)",
+      "A relação entre consumo e renda",
+      "A função oferta agregada"
+    ],
+    correct: 1,
+    resolucao: "A LM (Liquidity = Money) é o lugar geométrico dos pares (Y, i) que equilibram o mercado MONETÁRIO, ou seja, oferta real de moeda (M^s_N / P) = demanda por moeda ((M/P)^d). A causalidade na LM é: Y → (M/P)^d → i. Quando Y aumenta, a demanda por saldos reais (moeda em termos reais) aumenta, e para equilibrar o mercado monetário (com oferta fixa) a taxa de juros nominal i deve subir — relação positiva entre Y e i."
+  },
+  {
+    id: 34, bloco: "C", tema: "Demanda por moeda",
+    tipo: "mc",
+    q: "Na função (M/P)^d = d₁·Y − d₂·i, o que representa d₁?",
+    opts: [
+      "A sensibilidade da demanda por moeda à taxa de juros",
+      "A sensibilidade da demanda por moeda (saldos reais) à renda — elasticidade-renda da demanda por moeda",
+      "A oferta de moeda",
+      "O nível de preços"
+    ],
+    correct: 1,
+    resolucao: "d₁ é a sensibilidade da demanda por saldos reais à RENDA (elasticidade-renda da demanda por moeda). Representa o motivo-transação e o motivo-precaução: quanto mais renda, mais transações são feitas e mais moeda se retém. Já d₂ é a sensibilidade da demanda por moeda à taxa de JUROS (com sinal negativo: juros maiores tornam os títulos mais atrativos, reduzindo a demanda por moeda) — é o motivo-especulação ou preferência pela liquidez. A inclinação da LM é d₁/d₂."
+  },
+  {
+    id: 35, bloco: "C", tema: "Inclinação LM",
+    tipo: "mc",
+    q: "Qual é a inclinação da curva LM (no plano i × Y)?",
+    opts: [
+      "(1−c₁)/b",
+      "d₁/d₂",
+      "−d₂/d₁",
+      "M/P"
+    ],
+    correct: 1,
+    resolucao: "Inclinação da LM = d₁/d₂. Vem da equação: i = −(1/d₂)·(M^s_N/P) + (d₁/d₂)·Y. Observações: (1) quanto MAIOR d₁ (demanda por moeda mais sensível à renda), MAIS INCLINADA (vertical) a LM. (2) Quanto MENOR d₂ (demanda por moeda pouco sensível a juros), MAIS INCLINADA (vertical) a LM. Intuição: se a demanda por moeda reage pouco a i (d₂ pequeno), é preciso i subir muito para reequilibrar o mercado monetário quando Y aumenta."
+  },
+  {
+    id: 36, bloco: "C", tema: "Deslocamento LM",
+    tipo: "mc",
+    q: "O que faz a LM se deslocar para BAIXO (juros menores para cada Y)?",
+    opts: [
+      "Aumento de G",
+      "Aumento de T",
+      "Aumento de M^s_N (oferta nominal de moeda) OU queda de P (nível de preços)",
+      "Redução de I₀"
+    ],
+    correct: 2,
+    resolucao: "A LM desloca quando muda a OFERTA REAL de moeda (M^s_N / P). ↑M^s_N → mais moeda real disponível → para qualquer Y, o i de equilíbrio cai → LM desloca para BAIXO (ou equivalentemente, para a direita). Analogamente, ↓P tem o mesmo efeito (aumenta M/P). Já mudanças em G, T, C₀ ou I₀ deslocam a IS, não a LM. No IS-LM com P fixo, a Política Monetária atua exclusivamente via M^s_N."
+  },
+  {
+    id: 37, bloco: "C", tema: "Regiões LM",
+    tipo: "mc",
+    q: "Em um ponto ABAIXO da curva LM, o que está acontecendo no mercado monetário?",
+    opts: [
+      "Excesso de oferta de moeda (EOM)",
+      "Excesso de DEMANDA por moeda (EDM) — pois o i está baixo demais para o Y vigente",
+      "Equilíbrio",
+      "Excesso de oferta de bens"
+    ],
+    correct: 1,
+    resolucao: "Abaixo da LM: i está abaixo do nível que equilibraria o mercado monetário para aquele Y. Com i baixo, a demanda por moeda (M/P)^d = d₁Y − d₂i está ALTA (porque −d₂i é menos negativo). Logo: (M/P)^d > (M/P)^s ⟹ EDM (excesso de demanda por moeda). Acima da LM, o oposto: EOM (excesso de oferta de moeda). ATENÇÃO: o Exercício 3, item (3) da lista diz 'abaixo da LM há EOM' — isso é FALSO, é EDM."
+  },
+  {
+    id: 38, bloco: "C", tema: "Causalidade LM",
+    tipo: "mc",
+    q: "Na LM, qual é a sequência causal correta?",
+    opts: [
+      "i → M^d → Y",
+      "Y → (M/P)^d (demanda por saldos reais) → i",
+      "M → i → Y → DA",
+      "i → I → Y → M^d"
+    ],
+    correct: 1,
+    resolucao: "Na LM: Y (renda) → (M/P)^d (demanda por saldos reais) → i (juros). Se Y aumenta, a demanda por saldos reais aumenta (principalmente pelo motivo-transação); como a oferta é exógena, o excesso de demanda pressiona i para cima até reequilibrar o mercado. A 'variável de ligação' entre Y e i é a demanda por moeda. Representamos i em função de Y por convenção gráfica."
+  },
+  {
+    id: 39, bloco: "C", tema: "LM vertical (caso clássico)",
+    tipo: "mc",
+    q: "Quando d₂ = 0 (demanda por moeda insensível à taxa de juros), a curva LM:",
+    opts: [
+      "É horizontal",
+      "É vertical (caso clássico da demanda por moeda)",
+      "Tem inclinação negativa",
+      "Coincide com a IS"
+    ],
+    correct: 1,
+    resolucao: "Se d₂ = 0, a inclinação d₁/d₂ → ∞, ou seja, LM VERTICAL. É o CASO CLÁSSICO da demanda por moeda: toda demanda por moeda é por motivo-transação, nada por especulação. A taxa de juros não afeta a demanda por moeda. Consequências: (1) PM (política monetária) é MÁXIMA — ↑M desloca a LM vertical para a direita e muda Y diretamente. (2) PF (política fiscal) é TOTALMENTE INEFICAZ — ↑G desloca a IS para a direita, mas i sobe até o ponto em que I cai exatamente o mesmo tanto que G subiu (crowding out TOTAL). Y não muda."
+  },
+  {
+    id: 40, bloco: "C", tema: "Armadilha da liquidez",
+    tipo: "mc",
+    q: "Na armadilha da liquidez de Keynes, qual é o comportamento da LM?",
+    opts: [
+      "LM vertical",
+      "LM horizontal (d₂ → ∞), pois a demanda por moeda é infinitamente elástica aos juros",
+      "LM desloca para cima",
+      "LM coincide com a IS"
+    ],
+    correct: 1,
+    resolucao: "Armadilha da liquidez: d₂ → ∞ (preferência pela liquidez INFINITA). A demanda por moeda é infinitamente elástica à taxa de juros — ao nível de i da armadilha, o público está disposto a reter QUALQUER quantidade de moeda. LM HORIZONTAL. Consequências: (1) PM NULA — ↑M não muda i (pois o público absorve toda moeda extra sem exigir variação de i), então não muda I nem Y. (2) PF MÁXIMA — ↑G desloca IS sem que i suba, logo não há crowding out. É o cenário que Keynes identificou como justificativa para o ativismo fiscal em depressões."
+  },
+  {
+    id: 41, bloco: "C", tema: "Oferta de moeda",
+    tipo: "vf",
+    q: "No modelo IS-LM básico, a oferta de moeda M^s_N é considerada EXÓGENA, controlada pelo Banco Central.",
+    correct: true,
+    resolucao: "VERDADEIRO. Pressuposto do IS-LM: apenas o Banco Central oferta moeda, e essa oferta é exógena (instrumento de política). Por isso a linha de oferta real (M^s_N/P) no plano (M/P, i) é VERTICAL. Modelos mais sofisticados tornam a oferta endógena (reagindo a juros ou metas), mas no IS-LM básico da lista, vale a exogeneidade."
+  },
+  {
+    id: 42, bloco: "C", tema: "Saldos reais",
+    tipo: "mc",
+    q: "O que significa 'saldos reais' na expressão M/P?",
+    opts: [
+      "Dinheiro em espécie apenas",
+      "Poder de compra da moeda — quantidade de bens que a moeda nominal permite adquirir",
+      "Depósitos bancários",
+      "Títulos do governo"
+    ],
+    correct: 1,
+    resolucao: "Saldos reais (M/P) = moeda nominal (M) deflacionada pelo nível geral de preços (P). Representa o PODER DE COMPRA da moeda — quantos bens e serviços ela permite adquirir. Os agentes demandam saldos REAIS (não nominais), porque o que importa é quanto se pode comprar, não o número no bolso. Se P dobra e M dobra, (M/P) não muda — e o mercado monetário permanece equilibrado no mesmo i."
+  },
+  {
+    id: 43, bloco: "C", tema: "Equação quantitativa",
+    tipo: "mc",
+    q: "A Teoria da Preferência pela Liquidez de Keynes afirma que a demanda por moeda depende de:",
+    opts: [
+      "Apenas da renda",
+      "Apenas dos juros",
+      "Positivamente da renda (motivo-transação) e NEGATIVAMENTE dos juros (motivo-especulação)",
+      "Positivamente dos juros e negativamente da renda"
+    ],
+    correct: 2,
+    resolucao: "Teoria da Preferência pela Liquidez (Keynes): (M/P)^d = f(Y+, i−). (1) Relação POSITIVA com a renda Y — motivo-transação (mais renda, mais transações, mais moeda necessária) e motivo-precaução. (2) Relação NEGATIVA com i — motivo-especulação (juros altos tornam títulos mais atrativos, reduzindo a retenção de moeda). Essa é a intuição por trás de (M/P)^d = d₁·Y − d₂·i no modelo com forma funcional linear."
+  },
+  {
+    id: 44, bloco: "C", tema: "LM mais horizontal",
+    tipo: "mc",
+    q: "Quanto MAIOR for a elasticidade-juros da demanda por moeda (d₂), a LM fica:",
+    opts: [
+      "Mais vertical",
+      "Mais horizontal",
+      "Sem mudança",
+      "Com inclinação negativa"
+    ],
+    correct: 1,
+    resolucao: "Maior d₂ → inclinação da LM (d₁/d₂) MENOR → LM mais HORIZONTAL. Intuição: quando a demanda por moeda reage muito aos juros, uma pequena variação de i já equilibra o mercado monetário após ∆Y. Consequências: com LM horizontal, PF fica eficaz (pouco crowding out) e PM fica menos eficaz (no limite, armadilha da liquidez: PM nula)."
+  },
+  {
+    id: 45, bloco: "C", tema: "Canal PM no IS-LM",
+    tipo: "mc",
+    q: "No IS-LM, a política monetária expansionista eleva Y por qual canal?",
+    opts: [
+      "↑M → desloca LM para baixo → ↓i → ↑I (investimento) → ↑DA → ↑Y",
+      "↑M desloca IS para a direita",
+      "↑M reduz T diretamente",
+      "↑M aumenta G automaticamente"
+    ],
+    correct: 0,
+    resolucao: "Canal da PM expansionista: (1) ↑M^s_N → aumenta M/P (pois P fixo) → desloca LM para BAIXO (ou direita). (2) O novo ponto na IS tem i MENOR. (3) i menor → ↑I (investimento cresce). (4) ↑I → ↑DA → ↑Y (via multiplicador). O canal passa obrigatoriamente pelos juros e pelo investimento — por isso a eficácia depende de b (sensibilidade de I a i) e de d₂ (inclinação da LM, ou quanto i cai dado ∆M)."
+  },
+  {
+    id: 46, bloco: "C", tema: "Exercício 2 lista",
+    tipo: "vf",
+    q: "Quanto maior a elasticidade-renda da demanda por moeda (d₁), maior a inclinação da LM e menor a eficácia da política fiscal expansionista.",
+    correct: true,
+    resolucao: "VERDADEIRO. Inclinação LM = d₁/d₂; maior d₁ ⟹ LM mais íngreme. Com LM mais vertical, quando IS desloca para a direita por PF expansionista, i sobe muito ⟹ crowding out grande ⟹ ∆Y final pequeno. Essa é a afirmação (2) do Exercício 2 da lista (V)."
+  },
+  
+  // ============================================================
+  // BLOCO D — EFICÁCIA DE PF E PM / CROWDING OUT
+  // ============================================================
+  {
+    id: 47, bloco: "D", tema: "Crowding out",
+    tipo: "mc",
+    q: "O que é o efeito CROWDING OUT (efeito deslocamento)?",
+    opts: [
+      "Redução do investimento privado causada pelo aumento dos juros que resulta de uma expansão fiscal",
+      "Aumento do consumo devido à queda de juros",
+      "Efeito do aumento de M sobre G",
+      "Aumento de importações por conta de renda mais alta"
+    ],
+    correct: 0,
+    resolucao: "Crowding out (efeito deslocamento): quando o governo expande os gastos (↑G, política fiscal expansionista), isso empurra a IS para a direita, aumentando Y, o que eleva a demanda por moeda e empurra i para cima. Com i maior, o investimento privado I cai. Ou seja, parte do estímulo fiscal 'expulsa' o investimento privado. É a razão pela qual, no IS-LM, ∆Y é MENOR que mk·∆G (que seria o efeito do keynesiano simples). Aparece no Exercício 2, item (1) da lista como VERDADEIRA."
+  },
+  {
+    id: 48, bloco: "D", tema: "Eficácia PFE",
+    tipo: "mc",
+    q: "A política fiscal expansionista é MAIS eficaz quando:",
+    opts: [
+      "IS horizontal e LM vertical",
+      "IS VERTICAL (b pequeno) e LM HORIZONTAL (d₂ grande, ou armadilha da liquidez)",
+      "Quando c₁ = 0",
+      "Quando o multiplicador é pequeno"
+    ],
+    correct: 1,
+    resolucao: "PF máxima: IS vertical + LM horizontal. Intuição: (1) IS vertical (b pequeno) significa que quando i sobe, I não cai — sem crowding out pelo lado do investimento. (2) LM horizontal (d₂ grande) significa que quando Y sobe, i nem sobe — sem crowding out pelo lado dos juros. Mnemônico: 'PF quer tudo em quantidade, nada em preço'. O caso limite PERFEITO para PF é a armadilha da liquidez (LM horizontal), onde o multiplicador fiscal é igual ao multiplicador keynesiano puro. ATENÇÃO: o Exercício 5, item (0) da lista diz o OPOSTO (IS horizontal + LM vertical) — isso é FALSO."
+  },
+  {
+    id: 49, bloco: "D", tema: "Eficácia PME",
+    tipo: "mc",
+    q: "A política monetária expansionista é MAIS eficaz quando:",
+    opts: [
+      "IS vertical e LM horizontal",
+      "IS HORIZONTAL (b grande) e LM VERTICAL (d₂ pequeno, ou caso clássico)",
+      "IS horizontal e LM horizontal",
+      "IS vertical e LM vertical"
+    ],
+    correct: 1,
+    resolucao: "PM máxima: IS horizontal + LM vertical. Intuição: (1) LM vertical (d₂ pequeno) significa que quando M aumenta, i cai muito (pois a demanda por moeda não absorve o excesso via ajuste em i através do componente de juros). (2) IS horizontal (b grande) significa que quando i cai, I sobe muito, e Y sobe muito. O caso limite é o caso clássico (LM vertical): PM exerce efeito MÁXIMO sobre Y. Mnemônico: 'PM quer tudo em preço (i), que vira muita quantidade (I e Y)'."
+  },
+  {
+    id: 50, bloco: "D", tema: "Princípio de Gremaud",
+    tipo: "mc",
+    q: "Quais parâmetros governam a eficácia da política monetária expansionista (PME)?",
+    opts: [
+      "c₁ e G",
+      "d₂ (elasticidade-juros da demanda por moeda) e b (sensibilidade do investimento a juros)",
+      "T e P",
+      "d₁ e I₀"
+    ],
+    correct: 1,
+    resolucao: "Pelo Princípio de Gremaud, a PME atua em dois elos: (1) ∆M → ∆i: quão forte esse efeito é depende de d₂. Menor d₂ (LM mais vertical) → maior queda de i para dado ∆M. (2) ∆i → ∆I: depende de b. Maior b (IS mais horizontal) → maior ∆I para dado ∆i. Logo, PME é MAIS EFICAZ quanto MENOR d₂ e quanto MAIOR b. Já a PFE tem outros parâmetros chave: mk (grande é bom), d₁ (pequeno é bom), b (pequeno é bom — oposto da PM!)."
+  },
+  {
+    id: 51, bloco: "D", tema: "Exercício 4 lista",
+    tipo: "vf",
+    q: "A política fiscal é menos eficaz quando os investimentos são muito elásticos à taxa de juros (b grande).",
+    correct: true,
+    resolucao: "VERDADEIRO. Se b é grande (I muito sensível a i), quando a PF eleva i em resposta ao ↑Y, o investimento cai MUITO — crowding out forte ⟹ ∆Y pequeno. Afirmação (0) do Exercício 4 da lista = V."
+  },
+  {
+    id: 52, bloco: "D", tema: "Exercício 4 lista",
+    tipo: "vf",
+    q: "A política fiscal é menos eficaz quando a demanda por moeda é relativamente INELÁSTICA à taxa de juros (d₂ pequeno).",
+    correct: true,
+    resolucao: "VERDADEIRO. d₂ pequeno → LM mais vertical (íngreme) → quando PF desloca IS para a direita, i sobe muito → crowding out grande → ∆Y pequeno. No limite d₂=0 (caso clássico), PF é totalmente ineficaz. Afirmação (1) do Exercício 4 da lista = V."
+  },
+  {
+    id: 53, bloco: "D", tema: "Exercício 4 lista",
+    tipo: "vf",
+    q: "A política fiscal é sempre eficaz, em qualquer configuração do modelo IS-LM.",
+    correct: false,
+    resolucao: "FALSO. Contraexemplo canônico: o CASO CLÁSSICO, em que LM é vertical (d₂=0). Um aumento de G desloca a IS para a direita, mas como a LM é vertical, o novo equilíbrio tem MESMO Y e apenas i maior — o crowding out é TOTAL. Y não muda. Portanto, a PF NÃO é sempre eficaz. Afirmação (3) do Exercício 4 da lista = F."
+  },
+  {
+    id: 54, bloco: "D", tema: "Exercício 5 lista",
+    tipo: "vf",
+    q: "A eficácia da política fiscal será tanto maior quanto mais próxima da HORIZONTAL for a curva IS e mais próxima da VERTICAL for a curva LM.",
+    correct: false,
+    resolucao: "FALSO. É EXATAMENTE O OPOSTO. PF é mais eficaz quando a IS é VERTICAL (b pequeno, sem crowding out via I) e a LM é HORIZONTAL (d₂ grande, sem crowding out via i). A afirmação inverte os dois lados. É a pergunta (0) do Exercício 5 da lista = F."
+  },
+  {
+    id: 55, bloco: "D", tema: "Exercício 5 lista",
+    tipo: "vf",
+    q: "Quanto maior a sensibilidade do investimento à taxa de juros (b), mais eficaz poderá ser a política monetária.",
+    correct: true,
+    resolucao: "VERDADEIRO. A PM atua via ∆i → ∆I. Se b é grande (I muito sensível a i), uma queda pequena de i já gera muito aumento de I, o que amplifica o efeito sobre Y. É a afirmação (3) do Exercício 5 da lista = V. Também é equivalente a dizer que IS horizontal (b grande) favorece a PM."
+  },
+  {
+    id: 56, bloco: "D", tema: "Exercício 5 lista",
+    tipo: "vf",
+    q: "O crowding-out ocorre devido a uma expansão dos gastos do governo NÃO acompanhada por uma política monetária também expansionista.",
+    correct: false,
+    resolucao: "FALSO. O crowding out é intrínseco ao mecanismo do IS-LM sempre que a LM tem inclinação positiva — ele DECORRE do fato de que ↑G eleva Y, que eleva a demanda por moeda, que eleva i, reduzindo I. Uma PM expansionista ACOMODATÍCIA (que acompanhe a fiscal) pode NEUTRALIZAR o crowding out (porque desloca a LM para baixo junto), mas a AUSÊNCIA dela não é o que CAUSA o crowding out. A causa é a positividade da inclinação da LM. Afirmação (4) do Exercício 5 da lista = F."
+  },
+  {
+    id: 57, bloco: "D", tema: "Exercício 6 lista",
+    tipo: "vf",
+    q: "Quanto MENOR for a elasticidade-juros da demanda por moeda (d₂), MAIOR é o efeito sobre o nível de produto de uma dada expansão monetária.",
+    correct: true,
+    resolucao: "VERDADEIRO. d₂ menor → LM mais vertical. Quando a LM se desloca para a direita (por ↑M), o novo ponto na IS está mais distante à direita — ou seja, ∆Y maior. Também: a queda em i é maior (porque a demanda por moeda reage pouco a i), o que amplifica ∆I. Afirmação (0) do Exercício 6 da lista = V."
+  },
+  {
+    id: 58, bloco: "D", tema: "Exercício 6 lista",
+    tipo: "vf",
+    q: "Quanto MENOR for a elasticidade-juros da demanda por moeda (d₂), MAIOR é o efeito sobre o nível de produto de uma dada expansão do déficit público.",
+    correct: false,
+    resolucao: "FALSO. Este é o oposto do caso monetário — há uma SIMETRIA entre PM e PF. Menor d₂ → LM mais vertical é BOM para PM, mas RUIM para PF (mais crowding out). Afirmação (1) do Exercício 6 da lista = F. Regra mnemônica: LM íngreme ajuda PM e atrapalha PF."
+  },
+  {
+    id: 59, bloco: "D", tema: "Exercício 7 lista",
+    tipo: "vf",
+    q: "Quanto mais sensível for a demanda AGREGADA à taxa de juros (b grande), MAIOR o efeito da política monetária sobre o produto.",
+    correct: true,
+    resolucao: "VERDADEIRO. 'Demanda agregada sensível a i' equivale a b grande (pois I = I₀ − b·i é o componente da DA que depende de i). Com b grande, uma dada queda de i gera grande aumento de I e Y. PM mais eficaz. Afirmação (0) do Exercício 7 da lista = V."
+  },
+  {
+    id: 60, bloco: "D", tema: "Exercício 7 lista",
+    tipo: "vf",
+    q: "Quanto mais sensível for a demanda de moeda à taxa de juros (d₂ grande), MAIOR o efeito da política monetária sobre o produto.",
+    correct: false,
+    resolucao: "FALSO. É o OPOSTO. d₂ grande → LM horizontal → quando M aumenta, i quase não cai (a moeda extra é absorvida pela demanda sem necessidade de grande queda de i). Logo I não responde muito e Y pouco varia. No limite d₂ → ∞ (armadilha da liquidez), PM é NULA. Afirmação (1) do Exercício 7 da lista = F."
+  },
+  {
+    id: 61, bloco: "D", tema: "Exercício 7 lista",
+    tipo: "vf",
+    q: "Quanto mais sensível for a demanda agregada à taxa de juros (b grande), MAIOR o efeito da política fiscal sobre o produto.",
+    correct: false,
+    resolucao: "FALSO. SIMETRIA novamente. b grande significa IS horizontal — ruim para PF (muito crowding out via I). Quando G sobe e i sobe em resposta, I cai muito se b é grande, eliminando boa parte do estímulo. Afirmação (2) do Exercício 7 da lista = F."
+  },
+  {
+    id: 62, bloco: "D", tema: "Exercício 7 lista",
+    tipo: "vf",
+    q: "Quanto mais sensível for a demanda de moeda à taxa de juros (d₂ grande), MAIOR o efeito da política fiscal sobre o produto.",
+    correct: true,
+    resolucao: "VERDADEIRO. d₂ grande → LM horizontal → quando G sobe e empurra Y, a demanda por moeda sobe e isso é absorvido com pouca variação de i (pouco crowding out). No limite (armadilha da liquidez), PF tem efeito máximo, igual ao multiplicador keynesiano puro. Afirmação (3) do Exercício 7 da lista = V."
+  },
+  {
+    id: 63, bloco: "D", tema: "Simetria PM/PF",
+    tipo: "mc",
+    q: "Qual das condições abaixo favorece SIMULTANEAMENTE a eficácia da PF e da PM?",
+    opts: [
+      "IS vertical e LM horizontal",
+      "IS horizontal e LM vertical",
+      "Não existe — há SIMETRIA ENTRE PM E PF; o que ajuda uma atrapalha a outra",
+      "c₁ muito alto"
+    ],
+    correct: 2,
+    resolucao: "Existe simetria entre PM e PF. PF quer IS vertical + LM horizontal; PM quer IS horizontal + LM vertical. As duas querem configurações OPOSTAS das curvas. Por isso, em cada situação concreta, o policymaker deve avaliar as inclinações das curvas para decidir qual instrumento é mais eficaz. A única coisa que aumenta AMBAS é um c₁ maior (multiplicador maior ajuda tanto PF quanto PM)."
+  },
+  {
+    id: 64, bloco: "D", tema: "Deslocamento IS direita",
+    tipo: "mc",
+    q: "Uma REDUÇÃO de impostos (T) tem qual efeito sobre a IS?",
+    opts: [
+      "Desloca a IS para a esquerda",
+      "Desloca a IS para a direita (↓T → ↑Yd → ↑C → ↑DA)",
+      "Não afeta a IS",
+      "Desloca a LM para baixo"
+    ],
+    correct: 1,
+    resolucao: "↓T → ↑Yd (renda disponível) → ↑C (consumo) → ↑DA → ↑Y para cada i. Desloca a IS para a DIREITA. Mas ATENÇÃO: o efeito é MENOR que um ↑G de mesma magnitude, porque o multiplicador de impostos mT = −c₁/(1−c₁) é menor em módulo que o multiplicador de gastos mk = 1/(1−c₁). No Exercício 1 da lista, se aumentarmos T o efeito contracionista é menor que um corte equivalente de G seria expansionista."
+  },
+
+  // ============================================================
+  // BLOCO E — CASOS PARTICULARES
+  // ============================================================
+  {
+    id: 65, bloco: "E", tema: "Armadilha liquidez",
+    tipo: "vf",
+    q: "Na armadilha da liquidez, o público está disposto a reter QUALQUER quantidade de moeda a uma dada taxa de juros.",
+    correct: true,
+    resolucao: "VERDADEIRO. Definição canônica da armadilha: preferência pela liquidez INFINITA em um nível de juros i*. Nesse nível, o público é INDIFERENTE entre manter moeda ou títulos — absorve qualquer excesso de moeda sem exigir mudança em i. Exercício 12, item (0) da lista = V."
+  },
+  {
+    id: 66, bloco: "E", tema: "Armadilha liquidez",
+    tipo: "vf",
+    q: "Na armadilha da liquidez, a LM é HORIZONTAL e aumentos de M não a 'tiram do lugar' (não deslocam).",
+    correct: true,
+    resolucao: "VERDADEIRO. Com d₂ → ∞, a LM fica horizontal no nível de i da armadilha. Um aumento em M seria absorvido integralmente pela demanda por moeda SEM que i mudasse — por isso diz-se que a LM não se desloca (ela continua horizontal no mesmo nível de i). Exercício 12, item (1) da lista = V."
+  },
+  {
+    id: 67, bloco: "E", tema: "Armadilha liquidez",
+    tipo: "vf",
+    q: "Na armadilha da liquidez, a PM expansionista tem FORTE efeito sobre i e Y.",
+    correct: false,
+    resolucao: "FALSO. EXATAMENTE O OPOSTO. PM é IMPOTENTE na armadilha: ↑M não reduz i (pois o público absorve a moeda extra sem exigir queda de i) → não muda I → não muda Y. A PM é totalmente ineficaz. Por isso, Keynes argumentou que em depressões profundas (próximas da armadilha), a única arma é a política fiscal. Exercício 12, item (2) da lista = F."
+  },
+  {
+    id: 68, bloco: "E", tema: "Caso clássico",
+    tipo: "mc",
+    q: "No caso clássico de demanda por moeda (d₂ = 0), qual é o efeito de uma POLÍTICA FISCAL expansionista?",
+    opts: [
+      "Y aumenta proporcionalmente a G",
+      "Y NÃO MUDA (crowding out TOTAL); apenas i sobe",
+      "Y cai",
+      "i cai"
+    ],
+    correct: 1,
+    resolucao: "Caso clássico: LM VERTICAL. Um ↑G desloca a IS para a direita, mas como a LM é vertical, o novo equilíbrio tem MESMO Y e apenas i maior. O aumento de i é tal que a queda em I (investimento) compensa EXATAMENTE o aumento em G — crowding out TOTAL. A PF é INEFICAZ. Resultado interessante: no caso clássico, a ÚNICA forma de aumentar Y é via PM (já que a LM vertical se desloca para a direita quando M aumenta)."
+  },
+  {
+    id: 69, bloco: "E", tema: "Mapa eficácia",
+    tipo: "mc",
+    q: "Em qual situação a PF é MÁXIMA e a PM é NULA?",
+    opts: [
+      "Caso clássico (LM vertical)",
+      "Armadilha da liquidez (LM horizontal)",
+      "IS vertical",
+      "IS horizontal"
+    ],
+    correct: 1,
+    resolucao: "Armadilha da liquidez (LM horizontal, d₂ → ∞): PF MÁXIMA (sem crowding out via i, porque i não sobe) e PM NULA (↑M não muda i, logo não muda I nem Y). É o oposto do caso clássico, onde PF é nula e PM é máxima. Mapa resumo: (armadilha) = (PF máx, PM nula); (clássico) = (PF nula, PM máx)."
+  },
+  {
+    id: 70, bloco: "E", tema: "b grande",
+    tipo: "mc",
+    q: "Quando b é muito GRANDE (investimento muito sensível a juros), a IS é horizontal. Qual o efeito sobre a política fiscal?",
+    opts: [
+      "PF muito eficaz",
+      "PF POUCO eficaz — crowding out grande, porque pequenas variações de i provocam grandes variações de I",
+      "PF nula",
+      "Não há efeito sobre PF"
+    ],
+    correct: 1,
+    resolucao: "b grande → IS horizontal → PF POUCO eficaz. Quando a PF expansionista eleva i, o investimento I cai MUITO (porque b é grande). Muito crowding out. Por outro lado, isso É BOM para a PM: queda de i induz muito ∆I. Mapa de eficácia: b grande ⟹ PF baixa, PM alta. b pequeno ⟹ PF alta, PM baixa."
+  },
+  {
+    id: 71, bloco: "E", tema: "Exercício 8 lista",
+    tipo: "mc",
+    q: "No diagrama (i × Y), seja A um ponto sobre a IS, B um ponto abaixo de A na mesma vertical (mesmo Y, i menor). O que se pode dizer do ponto B?",
+    opts: [
+      "Em B há excesso de oferta de bens",
+      "Em B há EXCESSO DE DEMANDA POR BENS (EDB)",
+      "Em B o mercado de bens está em equilíbrio",
+      "Em B há excesso de oferta de moeda"
+    ],
+    correct: 1,
+    resolucao: "B está ABAIXO da IS (i menor que o necessário para equilibrar o mercado de bens naquele Y). Com i menor, o investimento I é MAIOR que o compatível com Y, logo DA > OA ⟹ EDB (excesso de demanda por bens). É o oposto do que a afirmação (0) do Exercício 8 da lista diz (que é F). Regra: abaixo da IS = EDB; acima da IS = EOB."
+  },
+  {
+    id: 72, bloco: "E", tema: "Exercício 8 lista",
+    tipo: "vf",
+    q: "No Exercício 8, a distância vertical AB mede o excesso de demanda por bens em B.",
+    correct: false,
+    resolucao: "FALSO. AB é uma distância no EIXO VERTICAL (eixo dos juros) — mede diferenças de i, não de quantidades de bens. O excesso de demanda por bens é uma QUANTIDADE, medida no eixo horizontal (Y). A medida correta seria a distância HORIZONTAL BC (onde C é o ponto na IS com o mesmo i que B). Afirmação (1) do Exercício 8 da lista = F."
+  },
+  {
+    id: 73, bloco: "E", tema: "Exercício 8 lista",
+    tipo: "vf",
+    q: "A distância AB (no Exercício 8) pode ser maior ou menor dependendo da elasticidade-juros do investimento (b).",
+    correct: true,
+    resolucao: "VERDADEIRO. Para um dado BC fixo (quantidade de excesso de demanda horizontal), a distância vertical AB depende da INCLINAÇÃO da IS. Se a IS é mais íngreme (b pequeno, I pouco sensível a i), então um dado ∆Y corresponde a um ∆i maior — AB grande. Se a IS é mais horizontal (b grande), AB é pequeno para o mesmo ∆Y. Afirmação (3) do Exercício 8 da lista = V."
+  },
+  {
+    id: 74, bloco: "E", tema: "Exercício 11 lista",
+    tipo: "vf",
+    q: "O multiplicador do orçamento equilibrado refere-se ao efeito de aumentos em EXPORTAÇÕES acompanhados por aumentos equivalentes em IMPORTAÇÕES.",
+    correct: false,
+    resolucao: "FALSO. O multiplicador do orçamento equilibrado é sobre G (gastos públicos) e T (impostos), NÃO sobre balança comercial. Refere-se a ↑G acompanhado de ↑T de mesma magnitude, deixando o saldo Sg = T − G inalterado — e mesmo assim gera ∆Y = ∆G (pelo Teorema de Haavelmo). Afirmação (2) do Exercício 11 = F."
+  },
+  {
+    id: 75, bloco: "E", tema: "Exercício 11 lista",
+    tipo: "vf",
+    q: "O multiplicador do orçamento equilibrado é sempre igual a 1, considerando T exógeno.",
+    correct: true,
+    resolucao: "VERDADEIRO. Teorema de Haavelmo: com T exógeno (não proporcional à renda), mOE = mk + mT = 1/(1−c₁) − c₁/(1−c₁) = 1. Isso significa que um aumento de 100 em G financiado com aumento de 100 em T gera um aumento de 100 em Y. Afirmação (1) do Exercício 11 = V. Obs: se T = t·Y (endógeno), o resultado não é exatamente 1, mas a essência se mantém."
+  },
+
+  // ============================================================
+  // BLOCO F — NUMÉRICAS E V/F (EXERCÍCIO 1 E ADICIONAIS)
+  // ============================================================
+  {
+    id: 76, bloco: "F", tema: "Ex. 1 lista — derivação IS",
+    tipo: "num",
+    q: "Dados C=200+0,8·Yd, I=150−1000r, G=300, T=0,25Y, r=i. Qual é a equação da IS na forma Y = a − b·r? Informe apenas o coeficiente de r.",
+    resposta: "-2500",
+    aceitar: ["-2500", "−2500", "2500"],
+    resolucao: "Substituindo Yd = Y − 0,25Y = 0,75Y: C = 200 + 0,8·0,75Y = 200 + 0,6Y. Equação Y = C + I + G: Y = 200 + 0,6Y + 150 − 1000r + 300 → Y − 0,6Y = 650 − 1000r → 0,4Y = 650 − 1000r → Y = 1625 − 2500r. Logo, o coeficiente de r é −2500. Observação: a magnitude 2500 = 1000/0,4 combina a sensibilidade direta do investimento aos juros (1000) com o multiplicador efetivo 1/0,4 = 2,5 (multiplicador com imposto proporcional)."
+  },
+  {
+    id: 77, bloco: "F", tema: "Ex. 1 lista — derivação LM",
+    tipo: "num",
+    q: "Com (M/P)^d = 2Y − 8000i e (M^s_N/P) = 2600, qual é a equação da LM na forma Y = a + b·i? Informe o coeficiente de i.",
+    resposta: "4000",
+    aceitar: ["4000"],
+    resolucao: "Igualando demanda e oferta reais de moeda: 2Y − 8000i = 2600 → 2Y = 2600 + 8000i → Y = 1300 + 4000i. O coeficiente de i é 4000. Ele vem de (d₂/d₁) · algum termo. Observação: quanto maior o coeficiente (em módulo), mais horizontal é a LM (mais Y varia para cada variação em i)."
+  },
+  {
+    id: 78, bloco: "F", tema: "Ex. 1 lista — equilíbrio Y",
+    tipo: "num",
+    q: "No Exercício 1 da lista, qual o valor de Y de equilíbrio?",
+    resposta: "1500",
+    aceitar: ["1500"],
+    resolucao: "Do Passo 3: IS: Y = 1625 − 2500i; LM: Y = 1300 + 4000i (usando r = i). Igualando: 1625 − 2500i = 1300 + 4000i → 325 = 6500i → i = 0,05 = 5%. Substituindo em qualquer das equações: Y = 1300 + 4000·0,05 = 1300 + 200 = 1500. Resposta oficial da lista: Y = 1500."
+  },
+  {
+    id: 79, bloco: "F", tema: "Ex. 1 lista — equilíbrio i",
+    tipo: "num",
+    q: "No Exercício 1 da lista, qual o valor de i de equilíbrio (em decimal)?",
+    resposta: "0,05",
+    aceitar: ["0,05", "0.05", "5%", "5"],
+    resolucao: "i = 0,05 = 5%. Calculado no Passo 3 da resolução: igualando IS (Y = 1625 − 2500i) com LM (Y = 1300 + 4000i), obtemos 325 = 6500i → i = 0,05."
+  },
+  {
+    id: 80, bloco: "F", tema: "Ex. 1 lista — Consumo",
+    tipo: "num",
+    q: "No Exercício 1 da lista, qual o valor do consumo C no equilíbrio?",
+    resposta: "1100",
+    aceitar: ["1100"],
+    resolucao: "Com Y=1500: T = 0,25·1500 = 375 → Yd = Y − T = 1500 − 375 = 1125. C = 200 + 0,8·1125 = 200 + 900 = 1100."
+  },
+  {
+    id: 81, bloco: "F", tema: "Ex. 1 lista — Investimento",
+    tipo: "num",
+    q: "No Exercício 1 da lista, qual o valor do investimento I no equilíbrio?",
+    resposta: "100",
+    aceitar: ["100"],
+    resolucao: "I = 150 − 1000·r = 150 − 1000·0,05 = 150 − 50 = 100. Como r = i = 0,05 (pois πᵉ = 0)."
+  },
+  {
+    id: 82, bloco: "F", tema: "Ex. 1 lista — Sp",
+    tipo: "num",
+    q: "No Exercício 1 da lista, qual o valor da poupança privada (Sp)?",
+    resposta: "25",
+    aceitar: ["25"],
+    resolucao: "Sp = Yd − C = 1125 − 1100 = 25. Interpretação: as famílias, com renda disponível de 1125, consomem 1100 e poupam 25."
+  },
+  {
+    id: 83, bloco: "F", tema: "Ex. 1 lista — Sg",
+    tipo: "num",
+    q: "No Exercício 1 da lista, qual o valor da poupança pública (Sg)?",
+    resposta: "75",
+    aceitar: ["75"],
+    resolucao: "Sg = T − G = 375 − 300 = 75. Interpretação: o governo arrecada 375 e gasta 300, gerando superávit (poupança pública) de 75."
+  },
+  {
+    id: 84, bloco: "F", tema: "Ex. 1 lista — S total",
+    tipo: "num",
+    q: "No Exercício 1 da lista, qual a poupança total (S_total)?",
+    resposta: "100",
+    aceitar: ["100"],
+    resolucao: "S_total = Sp + Sg = 25 + 75 = 100. CHECK: em economia fechada, S_total = I. Temos I = 100. Confere! Essa é a identidade macroeconômica fundamental: toda a poupança gerada na economia (privada + pública) é igual ao investimento agregado."
+  },
+  {
+    id: 85, bloco: "F", tema: "Ex. 1 lista — impostos",
+    tipo: "num",
+    q: "No Exercício 1 da lista, qual o valor total de impostos (T) no equilíbrio?",
+    resposta: "375",
+    aceitar: ["375"],
+    resolucao: "T = 0,25·Y = 0,25·1500 = 375. O imposto é endógeno (proporcional à renda, não exógeno), com alíquota t=0,25 (ou 25%). Isso faz com que o multiplicador efetivo seja 1/[1−c₁(1−t)] = 1/[1−0,8·0,75] = 1/0,4 = 2,5, e não 1/(1−c₁) = 5."
+  },
+  {
+    id: 86, bloco: "F", tema: "Consumo marginal vs médio",
+    tipo: "mc",
+    q: "Qual a diferença entre PMC (propensão marginal a consumir) e PMeC (propensão média a consumir)?",
+    opts: [
+      "São a mesma coisa",
+      "PMC = ∆C/∆Yd (variações), PMeC = C/Yd (níveis)",
+      "PMC é sempre maior que PMeC",
+      "PMeC é dada por c₁"
+    ],
+    correct: 1,
+    resolucao: "PMC = propensão MARGINAL a consumir = ∂C/∂Yd = c₁ (coeficiente angular). Indica a variação em C para uma variação em Yd. PMeC = propensão MÉDIA a consumir = C/Yd (razão dos níveis totais). Indica a fração da renda total que é consumida. Na função C = C₀ + c₁·Yd, PMC = c₁ é constante, mas PMeC = C₀/Yd + c₁ varia com Yd (cai conforme Yd cresce, pois C₀/Yd → 0). Por isso o Exercício 10 item (1) da lista é FALSO — não dá para calcular PMeC só com variações."
+  },
+  {
+    id: 87, bloco: "F", tema: "Multiplicador com tributo proporcional",
+    tipo: "num",
+    q: "Com c₁=0,8 e T=t·Y com t=0,25, qual o multiplicador efetivo (mk')?",
+    resposta: "2,5",
+    aceitar: ["2,5", "2.5"],
+    resolucao: "mk' = 1/[1 − c₁(1−t)] = 1/[1 − 0,8·0,75] = 1/[1 − 0,6] = 1/0,4 = 2,5. Compare com o multiplicador SEM imposto proporcional: 1/(1−c₁) = 1/0,2 = 5. O imposto proporcional CORTA o multiplicador pela METADE neste exemplo — é o estabilizador automático fiscal em ação. No Exercício 1 da lista esse 2,5 aparece 'implícito' no coeficiente −2500 = −1000·2,5 da equação da IS."
+  },
+  {
+    id: 88, bloco: "F", tema: "Identidades (economia fechada)",
+    tipo: "vf",
+    q: "Em economia fechada com governo, a identidade Y = C + I + G vale no EQUILÍBRIO.",
+    correct: true,
+    resolucao: "VERDADEIRO. É a equação da demanda efetiva (OA = DA) no modelo keynesiano simples e na IS. Em economia aberta viraria Y = C + I + G + (X − M). Essa identidade, combinada com Yd = Y − T (renda disponível) e Sp = Yd − C (poupança privada), leva a Sp + Sg = I (em economia fechada) — a identidade poupança-investimento."
+  },
+  {
+    id: 89, bloco: "F", tema: "Multiplicador PG",
+    tipo: "mc",
+    q: "A fórmula do multiplicador keynesiano 1/(1−c₁) vem da soma de qual série?",
+    opts: [
+      "Aritmética de razão c₁",
+      "Geométrica infinita de razão c₁ (0 < c₁ < 1)",
+      "Harmônica",
+      "Fatorial"
+    ],
+    correct: 1,
+    resolucao: "A série 1 + c₁ + c₁² + c₁³ + ... é uma PG (progressão geométrica) infinita de razão c₁ (com |c₁|<1), cuja soma é 1/(1−c₁). Cada termo representa uma 'rodada' do efeito multiplicador: a 1ª rodada injeta 1 real na renda; a 2ª rodada converte c₁ desse real em consumo (c₁); a 3ª consome c₁ disso (c₁²); e assim por diante. A tabela no slide com G=100 e c₁=0,8 ilustra: 100 + 80 + 64 + 51,2 + ... = 500."
+  },
+  {
+    id: 90, bloco: "F", tema: "Keynesiano vs IS-LM",
+    tipo: "mc",
+    q: "Qual a diferença ESSENCIAL entre o modelo keynesiano simples e o IS-LM?",
+    opts: [
+      "Os preços são flexíveis no IS-LM",
+      "No keynesiano simples a taxa de juros é EXÓGENA (ou I é exógeno); no IS-LM, i é determinado ENDOGENAMENTE pelo equilíbrio do mercado monetário",
+      "O IS-LM ignora o consumo",
+      "Não há diferença"
+    ],
+    correct: 1,
+    resolucao: "No modelo keynesiano simples, i é exógeno (ou I é totalmente exógeno), e só o mercado de bens entra na análise — o equilíbrio se dá via OA=DA. No IS-LM, introduz-se o mercado monetário, e i passa a ser determinado pela interação entre os dois mercados. Consequência prática: no keynesiano puro, o multiplicador de gastos é mk = 1/(1−c₁) puro; no IS-LM, há crowding out via i, reduzindo o multiplicador efetivo. Por isso o Exercício 2, item (0) da lista é FALSO — a incorporação do mercado monetário ATENUA o efeito da PF, não amplia."
+  },
+  {
+    id: 91, bloco: "F", tema: "Preços no IS-LM",
+    tipo: "vf",
+    q: "No modelo IS-LM básico, o nível de preços P é EXÓGENO e FIXO.",
+    correct: true,
+    resolucao: "VERDADEIRO. No IS-LM básico a OA é horizontal (pressuposto keynesiano — recursos ociosos, rigidez de preços). P é exógeno e fixo. Só o modelo OA-DA (médio prazo) relaxa essa hipótese, permitindo P variável. Por isso, no IS-LM, mudanças em M refletem-se integralmente em M/P (saldos reais), deslocando a LM sem compensação via P."
+  },
+  {
+    id: 92, bloco: "F", tema: "Mercado monetário — Y aumenta",
+    tipo: "mc",
+    q: "No gráfico do mercado monetário (i × M/P), se Y aumenta (ceteris paribus), o que acontece?",
+    opts: [
+      "A oferta (vertical) se desloca para a direita",
+      "A DEMANDA por saldos reais se desloca para a DIREITA; i de equilíbrio sobe",
+      "Nada muda",
+      "i cai"
+    ],
+    correct: 1,
+    resolucao: "Y maior → aumenta o motivo-transação → ↑(M/P)^d → curva de demanda desloca para a DIREITA (ou para cima). Com oferta fixa (vertical), o novo equilíbrio tem MESMA (M/P) mas i MAIOR. Isso gera pontos ao longo da LM no plano (Y, i): a cada Y maior corresponde um i maior — daí a inclinação positiva da LM."
+  },
+  {
+    id: 93, bloco: "F", tema: "Definições siglas",
+    tipo: "mc",
+    q: "O que significa a sigla DA no contexto macroeconômico?",
+    opts: [
+      "Dívida Ativa",
+      "Demanda Agregada — soma dos gastos na economia: C + I + G (+ X − M em aberta)",
+      "Déficit do Agente",
+      "Deflator Agregado"
+    ],
+    correct: 1,
+    resolucao: "DA = Demanda Agregada. Em economia FECHADA: DA = C + I + G. Em economia ABERTA: DA = C + I + G + (X − M), onde X=exportações e M=importações (atenção: aqui M não é moeda!). A DA representa o gasto TOTAL demandado na economia. No princípio da demanda efetiva (keynesiano), a DA determina Y."
+  },
+  {
+    id: 94, bloco: "F", tema: "Definições siglas",
+    tipo: "mc",
+    q: "O que significa OA no contexto macroeconômico?",
+    opts: [
+      "Obrigação Anual",
+      "Oferta Agregada — valor total da produção de bens e serviços na economia",
+      "Ordem Automática",
+      "Orçamento Alternativo"
+    ],
+    correct: 1,
+    resolucao: "OA = Oferta Agregada. No modelo keynesiano simples e no IS-LM, OA ≡ Y (a produção/renda agregada). No plano P × Y, a OA é HORIZONTAL no curto prazo (keynesiano), VERTICAL no longo prazo (clássico) e com INCLINAÇÃO POSITIVA no médio prazo (OA-DA). A condição de equilíbrio no mercado de bens é OA = DA, o que dá a reta de 45° na cruz keynesiana."
+  },
+  {
+    id: 95, bloco: "F", tema: "Definições siglas",
+    tipo: "mc",
+    q: "Na função Yd = Y − T, o que significa 'Yd'?",
+    opts: [
+      "Renda demandada",
+      "Renda disponível — a renda que resta às famílias após o pagamento de impostos líquidos",
+      "Demanda por renda",
+      "Divisão de dividendos"
+    ],
+    correct: 1,
+    resolucao: "Yd = renda disponível = Y (renda bruta) − T (impostos líquidos, ou seja, impostos menos transferências). É a renda efetivamente disponível para as famílias decidirem entre consumir (C) ou poupar (Sp): Yd = C + Sp. Entra na função consumo C = C₀ + c₁·Yd porque a decisão de consumo depende do que as famílias 'levam para casa', não da renda bruta."
+  },
+  {
+    id: 96, bloco: "F", tema: "Definições siglas",
+    tipo: "mc",
+    q: "Na notação (M^s_N/P), o que cada símbolo representa?",
+    opts: [
+      "M^s = oferta de moeda; N = nominal; P = nível de preços; logo (M^s_N/P) = oferta REAL de moeda",
+      "Todos são incógnitas",
+      "M = média; s = supplier; N = número; P = pessoa",
+      "M^s = moeda especulativa"
+    ],
+    correct: 0,
+    resolucao: "M^s_N = oferta nominal de moeda (sobrescrito 's' de supply; subscrito 'N' de nominal). P = nível geral de preços. Logo (M^s_N/P) = OFERTA REAL de moeda (ou saldos reais ofertados), que é o que importa para os agentes em termos de poder de compra. Essa oferta é exógena no modelo (controlada pelo BACEN). Equivale a M^s_R = M^s_N/P."
+  },
+  {
+    id: 97, bloco: "F", tema: "Definições siglas",
+    tipo: "mc",
+    q: "O que significa 'πᵉ' na equação de Fisher r = i − πᵉ?",
+    opts: [
+      "Pi — constante matemática",
+      "Inflação ESPERADA (expectacional, futura) — pelos agentes",
+      "Inflação observada passada",
+      "Taxa de câmbio"
+    ],
+    correct: 1,
+    resolucao: "πᵉ = inflação ESPERADA (não a realizada). O sobrescrito 'e' é de 'expectations' (expectativas). É a inflação que os agentes ANTECIPAM para o período futuro ao formar seus planos de consumo, investimento e poupança. Quando πᵉ = 0 (pressuposto do IS-LM básico), r = i — as taxas real e nominal coincidem. Se πᵉ > 0, os juros reais são MENORES que os nominais (o que estimula o investimento)."
+  },
+  {
+    id: 98, bloco: "F", tema: "Definições siglas",
+    tipo: "mc",
+    q: "Nas siglas PME e PFE, o que significam?",
+    opts: [
+      "PME = Pequena/Média Empresa, PFE = Pessoa Física",
+      "PME = Política Monetária Expansionista; PFE = Política Fiscal Expansionista",
+      "Nomes de economistas",
+      "Tipos de moeda"
+    ],
+    correct: 1,
+    resolucao: "No contexto macro: PME = Política Monetária Expansionista (↑M, ou ↓taxa básica), que no IS-LM desloca a LM para baixo. PFE = Política Fiscal Expansionista (↑G ou ↓T), que desloca a IS para a direita. As contrações (PMC e PFC) funcionam no sentido oposto. Toda a análise de 'eficácia' no IS-LM gira em torno de quem é mais potente: PME ou PFE, em diferentes configurações das curvas."
+  },
+  {
+    id: 99, bloco: "F", tema: "Definições siglas",
+    tipo: "mc",
+    q: "Na expressão mk = 1/(1−c₁), o que significa mk?",
+    opts: [
+      "Marca registrada",
+      "Multiplicador KEYNESIANO — mede quanto a renda final aumenta por unidade de gasto autônomo",
+      "Moeda em circulação",
+      "Mão-de-obra"
+    ],
+    correct: 1,
+    resolucao: "mk = multiplicador keynesiano (ou multiplicador de gastos autônomos). Mede ∆Y / ∆(gasto autônomo), onde 'gasto autônomo' é C₀, I₀ ou G — qualquer componente da DA que não depende endogenamente de Y. É SEMPRE maior que 1 (pois 0 < c₁ < 1). Existem variantes: o multiplicador de impostos (mT = −c₁/(1−c₁)), do orçamento equilibrado (mOE = 1), e as versões 'extendidas' com impostos proporcionais, investimento endógeno, importações, etc."
+  },
+  {
+    id: 100, bloco: "F", tema: "Ex. 2 lista — crowding out",
+    tipo: "vf",
+    q: "O efeito crowding out do investimento privado causado pelo aumento do gasto público, AUSENTE no modelo keynesiano simples, APARECE como consequência da política fiscal no modelo IS-LM.",
+    correct: true,
+    resolucao: "VERDADEIRO. É exatamente a afirmação (1) do Exercício 2 da lista = V. No keynesiano simples, i é fixo (ou I é totalmente exógeno), então nunca há crowding out. Ao incorporar o mercado monetário no IS-LM, ↑G → ↑Y → ↑M^d → ↑i → ↓I: o crowding out EMERGE. Essa é uma das diferenças mais importantes entre os dois modelos e explica por que o multiplicador 'efetivo' do IS-LM é menor que o mk puro."
+  },
+  {
+    id: 101, bloco: "F", tema: "Sinônimos",
+    tipo: "mc",
+    q: "A afirmação 'o investimento é muito elástico aos juros' é EQUIVALENTE a dizer:",
+    opts: [
+      "b é pequeno; IS vertical",
+      "b é GRANDE; IS HORIZONTAL; I reage muito a pequenas variações de i",
+      "d₂ é grande",
+      "c₁ é grande"
+    ],
+    correct: 1,
+    resolucao: "'I elástico a i' ⟺ b grande ⟺ I = I₀ − b·i responde fortemente a ∆i ⟺ IS horizontal (inclinação (1−c₁)/b pequena) ⟺ bom para PM, ruim para PF. Essas equivalências são cruciais para traduzir enunciados das provas em termos de parâmetros do modelo."
+  },
+  {
+    id: 102, bloco: "F", tema: "Sinônimos",
+    tipo: "mc",
+    q: "'Demanda por moeda muito sensível aos juros' equivale a:",
+    opts: [
+      "d₂ grande; LM horizontal; armadilha da liquidez no limite; PM pouco eficaz, PF muito eficaz",
+      "d₂ pequeno",
+      "LM vertical",
+      "Caso clássico"
+    ],
+    correct: 0,
+    resolucao: "'Md (demanda por moeda) muito sensível a i' ⟺ d₂ grande ⟺ LM horizontal (inclinação d₁/d₂ pequena). No limite (d₂ → ∞), armadilha da liquidez. Consequências: PM fica ineficaz (no limite, nula), PF fica muito eficaz (no limite, igual ao multiplicador keynesiano puro, sem crowding out)."
+  },
+  {
+    id: 103, bloco: "F", tema: "Mapa PF/PM",
+    tipo: "mc",
+    q: "Em qual destes cenários a PF é MUITO EFICAZ e a PM é POUCO EFICAZ (mas não nula)?",
+    opts: [
+      "b grande, d₂ pequeno",
+      "b pequeno, d₂ GRANDE (IS mais vertical, LM mais horizontal)",
+      "b grande, d₂ grande",
+      "Impossível determinar"
+    ],
+    correct: 1,
+    resolucao: "b pequeno + d₂ grande = IS vertical + LM horizontal. Esse é o combo dos sonhos da PF: sem crowding out via I (b pequeno) e sem crowding out via i (d₂ grande). Já a PM fica penalizada: b pequeno (∆i não gera ∆I) e d₂ grande (∆M mal muda i). É o cenário de 'economia em depressão' que Keynes defendia para ativismo fiscal."
+  },
+  {
+    id: 104, bloco: "F", tema: "Ex. 5 lista item 2",
+    tipo: "vf",
+    q: "Um aumento nos gastos do governo (G) representa um MOVIMENTO AO LONGO da IS (não um deslocamento).",
+    correct: false,
+    resolucao: "FALSO. ↑G é mudança de parâmetro EXÓGENO, então DESLOCA a IS para a direita, não move ao longo. Regra: variáveis nos eixos (Y, i) → movimento ao longo. Parâmetros (C₀, I₀, G, T, b, c₁) → deslocamento. Essa afirmação corresponde ao item (2) do Exercício 5 da lista = F. Junto com ela, o enunciado diz que ↓i aumentar I 'desloca a IS' — também FALSO, pois ∆I via ∆i é movimento ao longo."
+  },
+  {
+    id: 105, bloco: "F", tema: "Síntese",
+    tipo: "mc",
+    q: "Qual combinação resume MELHOR o MAPA DE EFICÁCIA das políticas no IS-LM?",
+    opts: [
+      "PF quer IS vertical + LM horizontal; PM quer IS horizontal + LM vertical",
+      "Ambas querem tudo horizontal",
+      "Ambas querem tudo vertical",
+      "As inclinações não importam"
+    ],
+    correct: 0,
+    resolucao: "MAPA DE EFICÁCIA (chave de prova): PF quer IS vertical (sem crowding via I) + LM horizontal (sem crowding via i) — o limite disso é a armadilha da liquidez. PM quer IS horizontal (I responde muito a i) + LM vertical (i cai muito com ∆M) — o limite disso é o caso clássico. Mnemônico: 'PF quer tudo em quantidade'; 'PM quer tudo em preço'. As duas políticas são ANTAGÔNICAS em termos do formato ideal das curvas."
+  },
+  {
+    id: 106, bloco: "F", tema: "Equação IS completa",
+    tipo: "mc",
+    q: "Partindo de Y = C + I + G, C = C₀ + c₁(Y − T), I = I₀ − b·r e r = i − πᵉ, qual é a expressão final da IS isolando i?",
+    opts: [
+      "i = (1/b)(C₀ − c₁T + I₀ + G + bπᵉ) − (1−c₁)/b · Y",
+      "i = (1−c₁)·Y − mk",
+      "i = C + I + G",
+      "i = M/P"
+    ],
+    correct: 0,
+    resolucao: "Dedução: Y = (C₀ + c₁Y − c₁T) + (I₀ − b(i−πᵉ)) + G. Expandindo: Y = C₀ + c₁Y − c₁T + I₀ − bi + bπᵉ + G. Isolando: bi = C₀ − c₁T + I₀ + G + bπᵉ − (1−c₁)Y → i = (1/b)(C₀ − c₁T + I₀ + G + bπᵉ) − [(1−c₁)/b]·Y. O intercepto (quando Y=0) é (1/b)·(autônomos ajustados), e a inclinação é −(1−c₁)/b (negativa)."
+  },
+  {
+    id: 107, bloco: "F", tema: "Equação LM completa",
+    tipo: "mc",
+    q: "A equação da LM isolando i, a partir de d₁Y − d₂i = M^s_N/P, é:",
+    opts: [
+      "i = −(1/d₂)·(M^s_N/P) + (d₁/d₂)·Y",
+      "i = d₁ · Y",
+      "i = M/P − Y",
+      "i = (d₂/d₁) · Y"
+    ],
+    correct: 0,
+    resolucao: "Partindo de d₁Y − d₂i = M^s_N/P: isolando −d₂i: −d₂i = (M^s_N/P) − d₁Y → i = −(1/d₂)·(M^s_N/P) + (d₁/d₂)·Y. Intercepto: −(1/d₂)·(M^s_N/P), que é negativo (a LM 'começa' abaixo do eixo). Inclinação: d₁/d₂ > 0 (por isso LM é crescente)."
+  },
+  {
+    id: 108, bloco: "F", tema: "Déficit vs dívida",
+    tipo: "mc",
+    q: "No modelo IS-LM, se G aumenta sem aumento correspondente de T, o que ocorre com o orçamento público?",
+    opts: [
+      "Permanece equilibrado",
+      "Gera DÉFICIT FISCAL primário (Sg = T − G < 0)",
+      "Gera superávit",
+      "O imposto aumenta automaticamente"
+    ],
+    correct: 1,
+    resolucao: "↑G com T fixo → Sg = T − G diminui → DÉFICIT primário. Isso teria implicações de financiamento (emissão de títulos ou monetização) que o modelo IS-LM básico não explicita, mas é importante diferenciar do Multiplicador do Orçamento Equilibrado (onde ↑G é acompanhado por ↑T, preservando Sg). No mundo real, políticas expansionistas sem contraparte fiscal geram trajetórias de dívida pública — tema para modelos mais avançados."
+  },
+  {
+    id: 109, bloco: "F", tema: "Siglas avançadas",
+    tipo: "mc",
+    q: "No pressuposto do IS-LM, '(M/P)^s' representa:",
+    opts: [
+      "Demanda por moeda",
+      "OFERTA de saldos reais — quantidade real de moeda disponibilizada pelo Banco Central",
+      "Sensibilidade a preços",
+      "Multiplicador monetário"
+    ],
+    correct: 1,
+    resolucao: "(M/P)^s = oferta real de moeda = M^s_N/P. É exógena no modelo (controlada pelo BACEN via M^s_N, com P fixo). O sobrescrito 's' indica 'supply' (oferta), e o índice 'R' ou 's' como exponente final às vezes aparece. No gráfico do mercado monetário (i × M/P), essa oferta é uma reta vertical, pois não depende de i."
+  },
+  {
+    id: 110, bloco: "F", tema: "Conclusão",
+    tipo: "mc",
+    q: "Qual é a identidade macroeconômica fundamental do IS-LM em economia fechada (validada no Exercício 1 da lista)?",
+    opts: [
+      "C = Y",
+      "S_total = Sp + Sg = I",
+      "M = Y",
+      "G = T"
+    ],
+    correct: 1,
+    resolucao: "S_total = Sp + Sg = I em economia fechada. No Exercício 1: Sp=25, Sg=75, S_total=100, I=100 → bate exatamente. Essa identidade é sempre válida em equilíbrio porque parte da definição de renda (Y = C + I + G) combinada com as definições de poupança privada (Sp = Y − T − C) e pública (Sg = T − G). Em economia aberta, ganha o termo (X−M): S_total = I + (X−M)."
+  }
+];
+
+</script>
+<script>
+/* ==========================================================
+   MICRO-DASHBOARD MACRO I — motor de revisão com SRS simples
+   Estratégia de priorização:
+     - score(q) = (erros + 1) / (acertos + erros + 2)   [pseudo-bayesiano]
+     - nunca-visto = prioridade média (score 0.5, impulsionado por 'freshness')
+     - dentro da sessão, questão errada volta depois de 2-4 questões
+   ========================================================== */
+
+const STORAGE_KEY = 'macroI_srs_v1';
+
+function loadMemory() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return {};
+    return JSON.parse(raw);
+  } catch (e) { return {}; }
+}
+function saveMemory(mem) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(mem)); } catch (e) {}
+}
+function getRec(mem, id) {
+  return mem[id] || { acertos: 0, erros: 0, visto: 0, last: 0 };
+}
+function priorityScore(rec) {
+  const total = rec.acertos + rec.erros;
+  if (total === 0) return 0.5; // nunca visto = prioridade média-alta
+  // score alto = erra mais = prioridade alta
+  return (rec.erros + 0.5) / (total + 1);
+}
+function freshness(rec) {
+  // quanto mais tempo sem ver, mais prioridade
+  if (!rec.last) return 1;
+  const hours = (Date.now() - rec.last) / 3600000;
+  return Math.min(1, hours / 24);
+}
+
+let state = {
+  memory: loadMemory(),
+  session: [],
+  idx: 0,
+  answered: new Set(),
+  sessionStats: { right: 0, wrong: 0 },
+  mode: 'normal', // normal | fracas
+};
+
+/* ---------- ordenação da sessão ---------- */
+function buildSession(pool, mode) {
+  const mem = state.memory;
+  const scored = pool.map(q => {
+    const rec = getRec(mem, q.id);
+    const prio = priorityScore(rec) * 0.7 + freshness(rec) * 0.3;
+    // ruído pra não ficar totalmente determinístico
+    return { q, score: prio + Math.random() * 0.15, rec };
+  });
+  if (mode === 'fracas') {
+    // só quem foi errado pelo menos 1 vez e tem erros >= acertos
+    const fracas = scored.filter(s => s.rec.erros >= 1 && s.rec.erros >= s.rec.acertos);
+    if (fracas.length === 0) {
+      alert('Você ainda não tem questões fracas registradas. Responda algumas primeiro.');
+      return scored.sort((a, b) => b.score - a.score).map(s => s.q);
+    }
+    return fracas.sort((a, b) => b.score - a.score).map(s => s.q);
+  }
+  // normal: ordem decrescente de prioridade
+  return scored.sort((a, b) => b.score - a.score).map(s => s.q);
+}
+
+/* ---------- registro de resposta ---------- */
+function recordAnswer(qId, acertou) {
+  const rec = getRec(state.memory, qId);
+  rec.visto += 1;
+  rec.last = Date.now();
+  if (acertou) rec.acertos += 1;
+  else rec.erros += 1;
+  state.memory[qId] = rec;
+  saveMemory(state.memory);
+  if (acertou) state.sessionStats.right += 1;
+  else {
+    state.sessionStats.wrong += 1;
+    // re-insere essa questão 2-4 posições depois pro usuário revisar logo
+    const q = state.session[state.idx];
+    const distance = 2 + Math.floor(Math.random() * 3);
+    const insertAt = Math.min(state.idx + distance, state.session.length);
+    state.session.splice(insertAt, 0, q);
+  }
+  state.answered.add(qId + '_' + state.sessionStats.right + state.sessionStats.wrong);
+}
+
+/* ---------- normalização de numéricas ---------- */
+function normalizeNum(s) {
+  if (s == null) return '';
+  return String(s).trim().toLowerCase().replace(/\s/g, '').replace(',', '.').replace('%', '');
+}
+function checkNumeric(input, q) {
+  const norm = normalizeNum(input);
+  const candidates = [q.resposta, ...(q.aceitar || [])];
+  return candidates.some(c => {
+    const cn = normalizeNum(c);
+    if (cn === norm) return true;
+    // tentar como número
+    const n1 = parseFloat(cn), n2 = parseFloat(norm);
+    if (!isNaN(n1) && !isNaN(n2) && Math.abs(n1 - n2) < 0.001) return true;
+    return false;
+  });
+}
+
+/* ---------- renderização ---------- */
+const mount = document.getElementById('card-mount');
+
+function currentQ() {
+  return state.session[state.idx];
+}
+
+function blocoLabel(b) {
+  const labels = {
+    'A': 'Keynesiano simples',
+    'B': 'Curva IS',
+    'C': 'Curva LM',
+    'D': 'Eficácia PF/PM',
+    'E': 'Casos particulares',
+    'F': 'Numéricas & síntese'
+  };
+  return labels[b] || b;
+}
+
+function updateHeaderStats() {
+  const total = state.session.length;
+  const done = state.sessionStats.right + state.sessionStats.wrong;
+  const acc = done === 0 ? '—' : Math.round(100 * state.sessionStats.right / done) + '%';
+  document.getElementById('stats').innerHTML = `<div><b>${state.idx + 1}</b> / ${total}</div><div id="acc-display">acerto: ${acc}</div>`;
+  document.getElementById('progFill').style.width = (100 * state.idx / total) + '%';
+  document.getElementById('navInfo').textContent = `Q${state.idx + 1} de ${total} · ${done} respondidas`;
+}
+
+function renderCard() {
+  const q = currentQ();
+  if (!q) { renderDone(); return; }
+  updateHeaderStats();
+
+  const rec = getRec(state.memory, q.id);
+  const isHot = rec.erros > rec.acertos && rec.visto > 0;
+
+  let html = `
+    <div class="card">
+      <div class="meta-line">
+        <span>Q${String(q.id).padStart(3, '0')}</span>
+        <span class="meta-sep">·</span>
+        <span>Bloco ${q.bloco} — ${blocoLabel(q.bloco)}</span>
+        <span class="meta-sep">·</span>
+        <span>${q.tema}</span>
+        ${isHot ? '<span class="meta-sep">·</span><span class="meta-tag hot">★ atenção</span>' : ''}
+      </div>
+      <div class="question">${q.q}</div>
+      <div id="answer-area"></div>
+      <div id="reso-area"></div>
+    </div>
+  `;
+  mount.innerHTML = html;
+
+  const answerArea = document.getElementById('answer-area');
+
+  if (q.tipo === 'mc') {
+    const letters = ['A', 'B', 'C', 'D', 'E'];
+    const opts = document.createElement('div');
+    opts.className = 'options';
+    q.opts.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'opt';
+      btn.innerHTML = `<span class="opt-letter">${letters[i]}</span><span>${opt}</span>`;
+      btn.onclick = () => handleMCAnswer(i, btn);
+      opts.appendChild(btn);
+    });
+    answerArea.appendChild(opts);
+  } else if (q.tipo === 'vf') {
+    const row = document.createElement('div');
+    row.className = 'vf-row';
+    [['VERDADEIRO', true], ['FALSO', false]].forEach(([label, val]) => {
+      const btn = document.createElement('button');
+      btn.className = 'vf-btn';
+      btn.textContent = label;
+      btn.onclick = () => handleVFAnswer(val, btn);
+      row.appendChild(btn);
+    });
+    answerArea.appendChild(row);
+  } else if (q.tipo === 'num') {
+    const row = document.createElement('div');
+    row.className = 'num-row';
+    row.innerHTML = `
+      <input type="text" class="num-input" id="numIn" placeholder="digite sua resposta" autocomplete="off" autocapitalize="off" spellcheck="false">
+      <button class="num-submit" id="numSubmit">Verificar</button>
+    `;
+    answerArea.appendChild(row);
+    const input = document.getElementById('numIn');
+    const submit = document.getElementById('numSubmit');
+    submit.onclick = () => handleNumAnswer(input.value, input, submit);
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); submit.click(); }
+    });
+    setTimeout(() => input.focus(), 100);
+  }
+  document.getElementById('nextBtn').disabled = true;
+}
+
+function showResolucao(q, acertou) {
+  const area = document.getElementById('reso-area');
+  area.innerHTML = `
+    <div class="resolucao">
+      <div class="reso-head">
+        <span>Resolução</span>
+        <span class="verdict ${acertou ? 'ok' : 'ko'}">${acertou ? '✓ CERTO' : '✗ ERRADO'}</span>
+      </div>
+      <div class="reso-body">${q.resolucao}</div>
+    </div>
+  `;
+  document.getElementById('nextBtn').disabled = false;
+  document.getElementById('nextBtn').focus();
+  // scroll suave pra resolução
+  setTimeout(() => area.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
+}
+
+function handleMCAnswer(idx, btn) {
+  const q = currentQ();
+  const acertou = idx === q.correct;
+  const allBtns = btn.parentElement.querySelectorAll('.opt');
+  allBtns.forEach((b, i) => {
+    b.disabled = true;
+    b.onclick = null;
+    if (i === q.correct) b.classList.add('correct');
+    else if (i === idx) b.classList.add('wrong');
+    else b.classList.add('fade');
+  });
+  recordAnswer(q.id, acertou);
+  showResolucao(q, acertou);
+  updateHeaderStats();
+}
+
+function handleVFAnswer(val, btn) {
+  const q = currentQ();
+  const acertou = val === q.correct;
+  const allBtns = btn.parentElement.querySelectorAll('.vf-btn');
+  allBtns.forEach((b) => {
+    b.disabled = true;
+    b.onclick = null;
+    const thisVal = b.textContent === 'VERDADEIRO';
+    if (thisVal === q.correct) b.classList.add('correct');
+    else if (thisVal === val) b.classList.add('wrong');
+    else b.classList.add('fade');
+  });
+  recordAnswer(q.id, acertou);
+  showResolucao(q, acertou);
+  updateHeaderStats();
+}
+
+function handleNumAnswer(val, input, submit) {
+  const q = currentQ();
+  const acertou = checkNumeric(val, q);
+  input.disabled = true;
+  submit.disabled = true;
+  submit.style.display = 'none';
+  input.classList.add(acertou ? 'correct' : 'wrong');
+  if (!acertou) {
+    input.value = val + '  →  resposta: ' + q.resposta;
+  }
+  recordAnswer(q.id, acertou);
+  showResolucao(q, acertou);
+  updateHeaderStats();
+}
+
+function nextQuestion() {
+  state.idx += 1;
+  if (state.idx >= state.session.length) {
+    renderDone();
+  } else {
+    renderCard();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+function renderDone() {
+  const total = state.sessionStats.right + state.sessionStats.wrong;
+  const acc = total === 0 ? 0 : Math.round(100 * state.sessionStats.right / total);
+  mount.innerHTML = `
+    <div class="done">
+      <div class="done-ornament">❦ ❦ ❦</div>
+      <div class="done-title">Sessão completa</div>
+      <div class="done-sub">Fim da rodada. A memória guarda seu progresso.</div>
+      <div class="done-stats">
+        <div class="done-stat"><div class="done-stat-val">${state.sessionStats.right}</div><div class="done-stat-lbl">Acertos</div></div>
+        <div class="done-stat"><div class="done-stat-val">${state.sessionStats.wrong}</div><div class="done-stat-lbl">Erros</div></div>
+        <div class="done-stat"><div class="done-stat-val">${acc}%</div><div class="done-stat-lbl">Taxa</div></div>
+      </div>
+      <button class="done-cta" onclick="restartSession()">Nova sessão</button>
+    </div>
+  `;
+  document.getElementById('nextBtn').disabled = true;
+  document.getElementById('progFill').style.width = '100%';
+}
+
+function restartSession(mode = 'normal') {
+  state.session = buildSession(QUESTIONS, mode);
+  state.idx = 0;
+  state.sessionStats = { right: 0, wrong: 0 };
+  state.answered = new Set();
+  state.mode = mode;
+  renderCard();
+  window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+/* ---------- navegação ---------- */
+document.getElementById('nextBtn').onclick = nextQuestion;
+
+/* ---------- menu ---------- */
+const menuPanel = document.getElementById('menuPanel');
+document.getElementById('menuOpen').onclick = () => {
+  renderMenu();
+  menuPanel.classList.add('open');
+};
+document.getElementById('menuClose').onclick = () => menuPanel.classList.remove('open');
+
+function renderMenu() {
+  // sessão
+  const r = state.sessionStats.right, w = state.sessionStats.wrong;
+  const t = r + w;
+  document.getElementById('sRespondidas').textContent = t;
+  document.getElementById('sCertas').textContent = r;
+  document.getElementById('sErradas').textContent = w;
+  document.getElementById('sTaxa').textContent = t === 0 ? '—' : Math.round(100 * r / t) + '%';
+  // memória global
+  const mem = state.memory;
+  const ids = Object.keys(mem);
+  const vistos = ids.length;
+  const dominadas = ids.filter(id => mem[id].acertos >= 2 && mem[id].erros === 0).length;
+  const fracas = ids.filter(id => mem[id].erros > mem[id].acertos).length;
+  const totalR = ids.reduce((acc, id) => acc + mem[id].acertos, 0);
+  const totalE = ids.reduce((acc, id) => acc + mem[id].erros, 0);
+  const taxaG = (totalR + totalE) === 0 ? '—' : Math.round(100 * totalR / (totalR + totalE)) + '%';
+  document.getElementById('mVistas').textContent = vistos;
+  document.getElementById('mDominadas').textContent = dominadas;
+  document.getElementById('mFracas').textContent = fracas;
+  document.getElementById('mTaxaG').textContent = taxaG;
+  // por bloco
+  const blocoList = document.getElementById('blocoList');
+  blocoList.innerHTML = '';
+  ['A','B','C','D','E','F'].forEach(b => {
+    const qs = QUESTIONS.filter(q => q.bloco === b);
+    let r = 0, w = 0, v = 0;
+    qs.forEach(q => {
+      const rec = mem[q.id];
+      if (rec) { r += rec.acertos; w += rec.erros; if (rec.visto > 0) v++; }
+    });
+    const taxa = (r + w) === 0 ? '—' : Math.round(100 * r / (r + w)) + '%';
+    const row = document.createElement('div');
+    row.className = 'bloco-row';
+    row.innerHTML = `<div class="bloco-name">Bloco ${b} · ${blocoLabel(b)}</div><div class="bloco-meta">${v}/${qs.length} · ${taxa}</div>`;
+    blocoList.appendChild(row);
+  });
+}
+
+document.getElementById('actRestart').onclick = () => { menuPanel.classList.remove('open'); restartSession('normal'); };
+document.getElementById('actFracas').onclick = () => { menuPanel.classList.remove('open'); restartSession('fracas'); };
+document.getElementById('actShuffle').onclick = () => { 
+  menuPanel.classList.remove('open'); 
+  // embaralha ignorando prioridade
+  state.session = [...QUESTIONS].sort(() => Math.random() - 0.5);
+  state.idx = 0;
+  state.sessionStats = { right: 0, wrong: 0 };
+  renderCard();
+  window.scrollTo({ top: 0 });
+};
+document.getElementById('actReset').onclick = () => {
+  if (confirm('Apagar TODO o histórico de acertos e erros? Esta ação não pode ser desfeita.')) {
+    state.memory = {};
+    saveMemory(state.memory);
+    menuPanel.classList.remove('open');
+    restartSession('normal');
+  }
+};
+
+/* ---------- swipe (opcional, pra mobile) ---------- */
+let touchStartX = 0;
+document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; }, { passive: true });
+document.addEventListener('touchend', (e) => {
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  if (dx < -80 && !document.getElementById('nextBtn').disabled) {
+    nextQuestion();
+  }
+}, { passive: true });
+
+/* ---------- keyboard ---------- */
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' || e.key === 'ArrowRight' || e.key === ' ') {
+    const nb = document.getElementById('nextBtn');
+    if (!nb.disabled && document.activeElement.tagName !== 'INPUT') {
+      e.preventDefault();
+      nextQuestion();
+    }
+  }
+  if (menuPanel.classList.contains('open') && e.key === 'Escape') {
+    menuPanel.classList.remove('open');
+  }
+});
+
+/* ---------- boot ---------- */
+restartSession('normal');
+</script>
+
+</body>
+</html>
